@@ -1,0 +1,1 @@
+Se simplificó el manejo de turnos de voz (se sacó el barge-in de grabar con un turno previo en vuelo), conservando que un toque en el orbe mientras Ceibo piensa cancela el turno y mientras habla corta la voz. Andaba más simple y más confiable antes; volvimos a eso.

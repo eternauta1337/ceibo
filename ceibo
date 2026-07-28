@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# CLI de admin de ceibo. Carga la config (GITHUB_APP_*, GITHUB_WIKIS_ORG,
+# OAUTH_BASE_URL, CEIBO_DB_PATH, …) desde el .env ÚNICO del root y corre el cli sobre
+# la misma DB. Sirve igual en la box y en local.
+set -e
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+env_file="$here/.env"
+if [ -f "$env_file" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  . "$env_file"
+  set +a
+fi
+# DB: un CEIBO_DB_PATH explícito (del .env) siempre gana. Si no hay uno y estamos en prod
+# (o sin CEIBO_ENV), caemos al ceibo.db del root. En dev/staging NO lo forzamos: dejamos que
+# el cli lo derive de CEIBO_ENV (defaultDbPath → ceibo.<env>.db) y así pega en la MISMA DB que
+# el stack — antes esto abría siempre ceibo.db y el cli operaba sobre la DB equivocada.
+if [ -z "${CEIBO_DB_PATH:-}" ] && [ "${CEIBO_ENV:-prod}" = "prod" ]; then
+  export CEIBO_DB_PATH="$here/data/ceibo.db"
+fi
+cd "$here"
+exec corepack pnpm -s cli "$@"

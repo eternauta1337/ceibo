@@ -1,0 +1,1 @@
+El asistente ahora puede ver los PDFs de tus conversaciones de WhatsApp (DM o grupo): los rasteriza a imágenes y los lee página por página, igual que ya hacía con los de Gmail. Antes solo te pasaba los metadatos.

@@ -1,0 +1,1 @@
+Las VMs de archima ya no exceptúan `ceibo.example.com` del proxy del Agent Vault (`no_proxy`): el entry era over-broad y quedó inerte (los MCP viven en `ceibo.example.com` y el git del wiki usa la URL tailscale local), así que se sacó para que nada en ese host pueda saltear el AV por accidente.

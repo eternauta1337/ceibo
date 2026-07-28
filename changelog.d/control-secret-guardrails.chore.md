@@ -1,0 +1,1 @@
+Guardrails contra el desfase del secreto del control MCP (que dejaba el connect roto en silencio): el gateway falla al arrancar si CONTROL_MCP_URL no coincide con CONTROL_MCP_SECRET, el deploy a staging chequea el endpoint del control (404 = desfase), y los .env.example explican que es un solo secreto en dos lugares.

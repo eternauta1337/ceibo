@@ -1,0 +1,17 @@
+{
+  "name": "@ceibo/mcps",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Familia de MCP servers self-hosted stateless (gmail, calendar, sheets, …) con un core compartido (transporte MCP + Google REST) y un launcher único. Proceso público propio detrás del ingress.",
+  "scripts": {
+    "start": "tsx src/launch.ts",
+    "dev": "tsx watch src/launch.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ceibo/speech": "workspace:*",
+    "@ceibo/store": "workspace:*"
+  }
+}

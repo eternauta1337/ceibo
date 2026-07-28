@@ -1,0 +1,1 @@
+El orbe de voz cambia de gesto: ahora se toca una vez para empezar a grabar y otra vez para terminar y enviar (antes era mantener apretado). La X sigue para cancelar. Esto también arregla el menú que aparecía en Chrome iOS.

@@ -1,0 +1,44 @@
+# Template unit para ceibo-mcps.
+# %i = nombre de instancia (ej. "staging"). Instanciar como: ceibo-mcps@staging.service
+#
+# Launcher de MCP servers stateless (gmail, calendar, drive, notion, schedule, …).
+# Puerto: prod 8810 (default), staging 8811 (override por PORT en .env.staging).
+#
+# Instalar en la box (como root):
+#   sudo cp packages/mcps/systemd/ceibo-mcps@.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now ceibo-mcps@staging.service
+#
+# Logs:    journalctl -u ceibo-mcps@staging -f
+# Restart: sudo systemctl restart ceibo-mcps@staging
+
+[Unit]
+Description=ceibo mcps (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=deploy
+
+WorkingDirectory=/home/deploy/ceibo-%i
+
+EnvironmentFile=/home/deploy/ceibo-%i/.env.%i
+
+Environment=CEIBO_ENV=%i
+
+# El .env.staging setea PORT=8001 para oauth. Mcps necesita su propio puerto.
+# Este Environment= sobreescribe el valor del EnvironmentFile (el último gana en systemd).
+# Prod: 8810 (default en launch.ts). Staging: 8811.
+Environment=PORT=8811
+
+ExecStart=/bin/node /home/deploy/ceibo-%i/node_modules/.pnpm/tsx@4.22.3/node_modules/tsx/dist/cli.mjs packages/mcps/src/launch.ts
+
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ceibo-mcps-%i
+
+[Install]
+WantedBy=multi-user.target

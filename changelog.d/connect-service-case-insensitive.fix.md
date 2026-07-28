@@ -1,0 +1,1 @@
+Conectar una cuenta (gmail, etc.) por chat ahora funciona aunque el modelo escriba el servicio con mayúscula ("Gmail"): el nombre del servicio se reconoce sin distinguir mayúsculas/minúsculas, así el link de conexión sale bien en vez de quedar en un placeholder.

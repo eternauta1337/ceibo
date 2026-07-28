@@ -1,0 +1,1 @@
+Las solapas de la nota salen del borde superior de la página (el contenido fluye por debajo hasta el borde), se remueven los headers de las zonas de notas y explorer, el botón de blame queda centrado verticalmente a la izquierda, y en mobile el botón de explorador se convierte en una ✕ para cerrarlo mientras está abierto.

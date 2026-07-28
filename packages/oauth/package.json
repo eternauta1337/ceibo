@@ -1,0 +1,22 @@
+{
+  "name": "@ceibo/oauth",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Subsistema OAuth: hoy enrola cuentas externas (Google Web app) y escribe la credencial mcp_oauth en el vault del usuario; en prod crece a broker de refresh. Proceso público propio (no el gateway).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "dev": "tsx watch src/server.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.97.1",
+    "@ceibo/agent": "workspace:*",
+    "@ceibo/backend-local": "workspace:*",
+    "@ceibo/store": "workspace:*"
+  }
+}

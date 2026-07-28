@@ -1,0 +1,29 @@
+# Oneshot de REM batch en gpuhost (Fase 5b): GET /api/rem/batch → runRemForWiki por wiki
+# (secuencial, scratch efímero) → POST /api/rem/report.
+#
+# Disparado por ceibo-rem-batch.timer (diario). El timer semanal se eliminó 2026-06-25.
+#
+# Instalar en gpuhost:
+#   cp packages/rem-runner/systemd/ceibo-rem-batch.{service,timer} \
+#      /home/ceibo/.config/systemd/user/
+#   systemctl --user daemon-reload
+#   # Timer DISABLED por defecto — activar tras smoke manual exitoso:
+#   systemctl --user enable --now ceibo-rem-batch.timer
+[Unit]
+Description=ceibo REM batch en gpuhost (batch-pull: GET batch → runREM por wiki → POST report)
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h
+
+# Variables de entorno del batch. Sin defaults seguros → fallan rápido si faltan.
+EnvironmentFile=%h/.config/ceibo/rem-batch.env
+
+# La wiki más larga puede tomar ~15 min; con varias wikis el batch entero puede llegar a horas.
+TimeoutStartSec=14400
+
+ExecStart=%h/.local/bin/node %h/rem-runner/rem-batch.cjs
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ceibo-rem-batch

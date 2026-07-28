@@ -1,0 +1,1 @@
+Fondo de la app: se acabó el flash de fondo negro mientras carga la imagen. Ahora el fondo arranca con el color sólido del tema y, cuando llega la foto de Unsplash, primero se ve una miniatura borrosa que se vuelve nítida al cargar (blur-up). Si no hay foto disponible queda el color del tema, sin flash. Se quitaron las imágenes de fondo locales: el fondo es solo Unsplash.

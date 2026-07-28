@@ -1,0 +1,29 @@
+# Backend del executor gemma para el REM batch en gpuhost: opencode-serve headless en
+# 127.0.0.1:4200, apuntado al config mínimo de REM (provider local→vLLM gemma, key real,
+# sin restricción de agente → el default escribe en el scratch de cada wiki). El runner se
+# conecta acá vía REM_OPENCODE_BASE=http://127.0.0.1:4200.
+#
+# Requiere en gpuhost: ~/.opencode/bin/opencode + ~/rem-runner/opencode-rem.json (config con la
+# key real de vLLM, fuera del repo) + vLLM gemma escuchando en 100.64.0.10:8000.
+#
+# Instalar:
+#   sudo cp packages/rem-runner/systemd/opencode-serve.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now opencode-serve.service
+[Unit]
+Description=ceibo REM: opencode serve (backend gemma del executor, :4200)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=demo
+Environment=OPENCODE_CONFIG=/home/ceibo/rem-runner/opencode-rem.json
+ExecStart=/home/ceibo/.opencode/bin/opencode serve --port 4200 --hostname 127.0.0.1
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ceibo-opencode-serve
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,1 @@
+El orbe es más liviano en mobile sin perder fluidez (sigue a 60fps y responde al toque al instante): los mini-orbs de los sub-agentes pasan a ser discos sólidos con un poco de glow (en vez de anillos mutantes), el visualizador de frecuencias deja de calcularse cuando no hay audio, y el lienzo se renderiza a una resolución acorde al tamaño real del orbe.

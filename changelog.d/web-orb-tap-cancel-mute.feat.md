@@ -1,0 +1,1 @@
+Un toque en el orbe mientras Ceibo responde lo interrumpe y para ahí: si está pensando, cancela el turno; si está hablando, corta la voz (sin cancelar el turno, el texto que falte se sigue escribiendo). Ya no arranca a grabar de una; el próximo toque graba normal.

@@ -1,0 +1,32 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Session.vim
+*.swp
+*.swo
+*.db
+*.db-shm
+*.db-wal
+data/
+secrets/
+
+# scope local de agentes (estado de sesión, no se versiona)
+.claude/active-scope
+# worktrees de features (cada uno es su propio checkout; no se versionan acá)
+.claude/worktrees/
+coverage/
+tmp/
+
+# planes de trabajo locales (no se versionan)
+.backlog-planes/
+
+# Capturas de los harness de QA: se generan corriendo el harness, no se versionan
+# (eran ~45 MB de PNGs en el repo).
+orb-scrim-lab/
+packages/web/harness/*.png
+packages/web/harness/*.jpg

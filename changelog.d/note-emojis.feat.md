@@ -1,0 +1,1 @@
+Ahora podés ponerle un emoji a cada nota (estilo Notion) para ubicarla de un vistazo: aparece junto al nombre en el explorador, en la pestaña y en el título del editor. Lo asignás con click derecho sobre la nota → "Emoji…". El emoji se guarda en la propia wiki (versiona con tus notas).

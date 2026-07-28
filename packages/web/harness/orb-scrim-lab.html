@@ -1,0 +1,310 @@
+<!doctype html>
+<!-- Lab del scrim radial del orb (NO va al build de prod: vite build solo toma index.html).
+     Replica la pantalla "sólo voz" (greeting + orb WebGL real + underhint) sobre fondos
+     representativos (claro/medio/oscuro + un blanco sintético extremo) y permite comparar
+     variantes del tratamiento radial que oscurece la zona del orb para que el orbe BLANCO
+     no se pierda contra imágenes claras.
+
+     Uso: pnpm --filter @ceibo/web dev → http://localhost:5173/harness/orb-scrim-lab.html
+     Params: ?bg=white|light|medium|dark  &v=none|a|b|c|d  &clean=1 (oculta controles)
+
+     Variantes (los valores exactos son el entregable — ver el bloque [data-v] abajo):
+       a) halo    — radial scrim suave y acotado detrás del orb (≈2.1× su diámetro)
+       b) amplio  — scrim radial más ancho y tenue que abraza saludo + orb + hint
+       c) sombra  — disco oscuro blureado pegado al orb (drop-shadow/elevación)
+       d) viñeta  — tratamiento foto: dim plano global sutil + énfasis radial al centro -->
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>orb scrim lab — ceibo</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; overscroll-behavior: none; }
+      body {
+        font-family: "Inter Tight Variable", system-ui, -apple-system, sans-serif;
+        overflow: hidden;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      /* ===== Réplica de .app (index.css:139-160): fondo imagen cover + columna centrada ===== */
+      .stage {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 2rem 7rem;
+        background: #0d1410 var(--lab-bg) center / cover no-repeat;
+      }
+      body[data-bg="white"] .stage {
+        /* Blanco extremo sintético: simula la peor foto Unsplash (cielo quemado / niebla). */
+        --lab-bg: linear-gradient(180deg, #f2f3f1 0%, #e7eae6 55%, #dfe4df 100%);
+      }
+      body[data-bg="light"] .stage { --lab-bg: url(/bg/2.jpg); }
+      body[data-bg="medium"] .stage { --lab-bg: url(/bg/1.jpg); }
+      body[data-bg="dark"] .stage { --lab-bg: url(/bg/6.jpg); }
+
+      /* ===== Réplica de .dock (sin nota) ===== */
+      .dock {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        pointer-events: none;
+      }
+
+      /* ===== Réplica de .greeting (index.css:227-250) ===== */
+      .greeting {
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        right: 0;
+        margin: 0 0 calc(1.25rem - 1cm);
+        padding: 0 1.25rem;
+        text-align: center;
+        z-index: 2;
+        font-weight: 600;
+        font-size: clamp(1.62rem, 4.86vw, 2.7rem);
+        line-height: 1.2;
+        letter-spacing: -0.015em;
+        color: #fff;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+        text-wrap: balance;
+      }
+
+      /* ===== Réplica de .orb-mover / .orb / .orb-canvas (index.css:216-390) ===== */
+      .orb-mover {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .orb {
+        --orb-ref: 100vmin;
+        --size: clamp(8rem, calc(0.8 * var(--orb-ref)), 30rem);
+        position: relative;
+        width: var(--size);
+        height: var(--size);
+        border-radius: 50%;
+      }
+      .orb-canvas {
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 150%;
+        height: 150%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        /* sin transición (la app usa 0.3s): los screenshots del lab no agarran el fade a medias */
+        pointer-events: none;
+      }
+
+      /* ===== Réplica de .orb-hint (underhint, index.css:3893-3919) ===== */
+      .orb-hint {
+        align-self: center;
+        margin: 0;
+        max-width: min(22rem, 80vw);
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(20, 20, 22, 0.42);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.22);
+        text-align: center;
+        font-size: 0.95rem;
+        font-weight: 500;
+        font-style: italic;
+        letter-spacing: 0.01em;
+        color: rgba(255, 255, 255, 0.82);
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+      }
+
+      /* ============================================================================
+         LAS VARIANTES. Color base del scrim: negro-verde profundo (rgb(7,12,9), el
+         mismo tinte que el fallback #0d1410 del fondo) — más orgánico que negro puro.
+         Todos los gradientes usan stops eased (aprox. gaussiana) para que NO se vea
+         el borde del gradiente (el "parche").
+         ============================================================================ */
+
+      /* Capa full-stage (variantes b y d): entre la imagen y el contenido. */
+      .stage-scrim { position: absolute; inset: 0; pointer-events: none; }
+      /* Capa pegada al orb (variantes a y c): centrada detrás del canvas. */
+      .orb-backdrop {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+      }
+
+      /* (a) HALO — radial suave y acotado detrás del orb. 2.1× el diámetro del orbe,
+         pico 0.36 al centro, caída eased a 0. Anclado al orb: lo sigue en cualquier layout. */
+      body[data-v="a"] .orb-backdrop {
+        width: calc(var(--size) * 2.1);
+        height: calc(var(--size) * 2.1);
+        border-radius: 50%;
+        background: radial-gradient(
+          closest-side,
+          rgba(7, 12, 9, 0.36) 0%,
+          rgba(7, 12, 9, 0.33) 28%,
+          rgba(7, 12, 9, 0.24) 48%,
+          rgba(7, 12, 9, 0.13) 66%,
+          rgba(7, 12, 9, 0.05) 82%,
+          rgba(7, 12, 9, 0) 100%
+        );
+      }
+
+      /* (b) AMPLIO — elipse ancha y tenue que cubre saludo + orb + underhint. Centro
+         apenas arriba del centro geométrico (donde vive el bloque). Pico 0.30. */
+      body[data-v="b"] .stage-scrim {
+        background: radial-gradient(
+          ellipse 58% 62% at 50% 46%,
+          rgba(7, 12, 9, 0.3) 0%,
+          rgba(7, 12, 9, 0.27) 32%,
+          rgba(7, 12, 9, 0.18) 56%,
+          rgba(7, 12, 9, 0.08) 76%,
+          rgba(7, 12, 9, 0) 100%
+        );
+      }
+
+      /* (c) SOMBRA — disco oscuro blureado pegado al orb (lee como elevación/drop-shadow).
+         1.25× el orbe, alpha alto (0.5) pero blur grande → núcleo oscuro, borde difuso. */
+      body[data-v="c"] .orb-backdrop {
+        width: calc(var(--size) * 1.25);
+        height: calc(var(--size) * 1.25);
+        border-radius: 50%;
+        background: rgba(7, 12, 9, 0.5);
+        filter: blur(calc(var(--size) * 0.18));
+      }
+
+      /* (d) VIÑETA FOTO — tratamiento fotográfico de toda la imagen: dim plano sutil
+         (0.12) + énfasis radial al centro (0.22 extra). La imagen entera queda coherente. */
+      body[data-v="d"] .stage-scrim {
+        background:
+          radial-gradient(
+            ellipse 70% 75% at 50% 46%,
+            rgba(7, 12, 9, 0.22) 0%,
+            rgba(7, 12, 9, 0.18) 40%,
+            rgba(7, 12, 9, 0.1) 65%,
+            rgba(7, 12, 9, 0) 100%
+          ),
+          rgba(7, 12, 9, 0.12);
+      }
+
+      /* (e) COMBO — la recomendación: el tratamiento foto de (d) un punto más liviano
+         (coherencia global, cero "parche") + un halo chico y tenue pegado al orb (pop
+         local). Cada capa sola es sutil; juntas el orbe destaca sobre cualquier imagen. */
+      body[data-v="e"] .stage-scrim {
+        background:
+          radial-gradient(
+            ellipse 70% 75% at 50% 46%,
+            rgba(7, 12, 9, 0.18) 0%,
+            rgba(7, 12, 9, 0.15) 40%,
+            rgba(7, 12, 9, 0.08) 65%,
+            rgba(7, 12, 9, 0) 100%
+          ),
+          rgba(7, 12, 9, 0.1);
+      }
+      body[data-v="e"] .orb-backdrop {
+        width: calc(var(--size) * 1.8);
+        height: calc(var(--size) * 1.8);
+        border-radius: 50%;
+        background: radial-gradient(
+          closest-side,
+          rgba(7, 12, 9, 0.22) 0%,
+          rgba(7, 12, 9, 0.2) 30%,
+          rgba(7, 12, 9, 0.14) 52%,
+          rgba(7, 12, 9, 0.07) 72%,
+          rgba(7, 12, 9, 0) 100%
+        );
+      }
+
+      /* (f) CANON DEL REVIEW — los valores exactos del hallazgo P0-2 del review de diseño
+         general: scrim radial detrás del dock (::before, inset -22% -28%, ellipse 58% 52%)
+         + saludo con sombra reforzada en dos capas. Para comparar manzanas con manzanas. */
+      body[data-v="f"] .dock::before {
+        content: "";
+        position: absolute;
+        inset: -22% -28%;
+        background: radial-gradient(
+          ellipse 58% 52% at 50% 50%,
+          rgba(10, 14, 11, 0.38),
+          rgba(10, 14, 11, 0.16) 55%,
+          transparent 78%
+        );
+        pointer-events: none;
+        z-index: -1;
+      }
+      body[data-v="f"] .greeting {
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 2px 14px rgba(0, 0, 0, 0.45);
+      }
+
+      /* Saludo liviano (P1-6 del review): weight 400 editorial (como la landing) en vez del
+         600 actual. El review nota que el 600 era compensación de contraste sin scrim; CON
+         scrim el liviano aguanta sobre foto. Toggle ?gw=400 para verlo junto a las variantes. */
+      body[data-gw="400"] .greeting {
+        font-weight: 400;
+        letter-spacing: -0.03em;
+      }
+
+      /* ===== Chrome del lab (controles + etiqueta), se oculta con ?clean=1 ===== */
+      .controls {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 50;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        font-size: 12px;
+      }
+      .controls a {
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 999px;
+        padding: 4px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+      }
+      .controls a.on { background: #ef623a; border-color: #ef623a; }
+      .label {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        z-index: 50;
+        font-size: 12px;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.55);
+        border-radius: 6px;
+        padding: 3px 8px;
+      }
+      body.clean .controls, body.clean .label { display: none; }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="stage-scrim"></div>
+      <div class="dock">
+        <p class="greeting">Hola Alicia, ¿qué te saco de encima hoy?</p>
+        <div class="orb-mover">
+          <div class="orb">
+            <div class="orb-backdrop"></div>
+            <canvas id="orb-canvas" class="orb-canvas"></canvas>
+          </div>
+          <p class="orb-hint">Mantené presionado para hablar</p>
+        </div>
+      </div>
+    </div>
+    <nav class="controls" id="controls"></nav>
+    <div class="label" id="label"></div>
+    <script type="module" src="./orbScrimLab.ts"></script>
+  </body>
+</html>

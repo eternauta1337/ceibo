@@ -1,0 +1,21 @@
+<!doctype html>
+<!-- Harness manual de las Fases B y C de notas (NO va al build de prod: vite build solo
+     toma index.html). Monta el FileEditor REAL con un mini-server stubbeado (PUT optimista
+     por sha → 409, GET de lo vigente) y botones que simulan a los otros escritores: cambio
+     externo vía feed (setDoc, Fase C) y commit silencioso al server (Fase B: el próximo
+     autosave da 409 → rebase transparente o panel de conflicto con opciones).
+     Verifica en un browser de verdad lo que headless no cubre: transacción CM6 con
+     cursor/scroll/folds intactos, merge del 409 sin cartel, banner con buffer dirty,
+     remount solo al cambiar de nota.
+     Uso: pnpm --filter @ceibo/web dev → http://localhost:5173/notelab.html -->
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>notelab — harness Fases B/C</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/notelab.tsx"></script>
+  </body>
+</html>

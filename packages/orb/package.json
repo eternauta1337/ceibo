@@ -1,0 +1,19 @@
+{
+  "name": "@ceibo/orb",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Orbe push-to-talk (WebGL): anillos de contorno topográficos, config por estado. Core vanilla + harness standalone que escribe orb.config.json (la app lo consume directo).",
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./orb.config.json"
+  },
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

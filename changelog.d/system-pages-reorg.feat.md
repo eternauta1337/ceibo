@@ -1,0 +1,1 @@
+Reorganización de las páginas de sistema: el idioma del asistente y las opciones de voz (micrófono, voz, velocidad) salen de Configuración y pasan a su propia página, "Idioma y voz", ubicada arriba de Configuración en el menú lateral. El toggle de autoría por línea (la vieja página "Ediciones") se integra dentro de Configuración y deja de ser una página aparte.

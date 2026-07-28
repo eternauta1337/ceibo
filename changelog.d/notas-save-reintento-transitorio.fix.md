@@ -1,0 +1,1 @@
+El editor ya no muestra el rojo "no se pudo guardar" ante un fallo pasajero (blip de red, un 5xx, o el read-after-write de GitHub cuando editás intenso): ahora reintenta el guardado con backoff durante ~14s antes de avisar el error, y el texto sigue protegido en el borrador mientras tanto. El cartel rojo queda para un fallo realmente persistente.

@@ -1,0 +1,1 @@
+El orbe ahora consume mucho menos en mobile: tras unos segundos quieto se "asienta" en una geometría perfecta y congela su animación (cero GPU) hasta que el asistente vuelve a hacer algo. Antes animaba sin parar y tiraba el framerate.

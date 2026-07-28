@@ -1,0 +1,16 @@
+# Dispara ceibo-rem-batch.service todos los días a las 07:30 UTC.
+# (El timer semanal se eliminó 2026-06-25: era redundante con el diario —mismo binario,
+#  mismo endpoint, sin scope distinto—; ahora REM corre una sola pasada por día.)
+#
+# ⚠️ DISABLED por defecto. Activar con:
+#   systemctl --user enable --now ceibo-rem-batch.timer
+[Unit]
+Description=Dispara ceibo REM batch en gpuhost (diario 07:30 UTC)
+
+[Timer]
+OnCalendar=*-*-* 07:30:00 UTC
+Persistent=true
+
+# [Install] comentado: activar explícitamente tras smoke manual exitoso.
+# [Install]
+# WantedBy=timers.target

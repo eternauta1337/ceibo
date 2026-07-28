@@ -1,0 +1,18 @@
+<!doctype html>
+<!-- Harness DEV-ONLY del editor de notas para los 4 bugs de la sección WIP (autocomplete,
+     mails invisibles, links crudos que desaparecen, lista con `*` final). Monta el
+     FileEditor REAL (mismas extensiones que la app) con fetch mockeado para /api/file.
+     NO entra al build (Vite sólo bundlea index.html); se abre con
+     `pnpm --filter @ceibo/web dev` en http://localhost:5173/harness/editor-lab.html.
+     Validación en browser real (lección de #295: lo headless no alcanza para el editor). -->
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Harness · editor (WIP bugs)</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./editorLab.tsx"></script>
+  </body>
+</html>

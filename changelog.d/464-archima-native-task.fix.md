@@ -1,0 +1,1 @@
+El asistente de notas (archima) ahora delega en su sub-agente con el mecanismo nativo del harness y escribe las notas de forma confiable, incluso recién arrancado el entorno (antes una falla transitoria al clonar la wiki podía perder la nota en silencio).

@@ -1,0 +1,95 @@
+diff --git a/dist/AtomicCodeMirrorEditor.js b/dist/AtomicCodeMirrorEditor.js
+index 5a3d4d0844179cdb7f6465869989fe6ff595539e..ac186b21ac63355fee0c8de69a5dbbfa907ce41c 100644
+--- a/dist/AtomicCodeMirrorEditor.js
++++ b/dist/AtomicCodeMirrorEditor.js
+@@ -58,10 +58,11 @@ export function AtomicCodeMirrorEditor({ markdownSource, documentId, initialSear
+                     indentOnInput(),
+                     rectangularSelection(),
+                     highlightActiveLine(),
+-                    // Obsidian-style bracket pairing.
+-                    closeBrackets(),
+-                    extendEmphasisPair,
+-                    autoCloseCodeFence,
++                    // ceibo patch: autoclosing DESACTIVADO (closeBrackets + énfasis + code fence).
++                    // El auto-cierre de `[` provocaba un baile de overtype del `]` que, en la 1er
++                    // línea de una nota nueva (editor frío), abría una ventana donde se dropeaba la
++                    // tecla siguiente (el espacio final de `- [ ] `) → el checkbox quedaba como
++                    // markdown crudo de forma intermitente. Sin autoclosing el tipeo es lineal.
+                     EditorView.lineWrapping,
+                     // Find-in-document. `top: true` drops the panel above the
+                     // editor (matching Obsidian / the prior Milkdown panel).
+@@ -80,14 +81,12 @@ export function AtomicCodeMirrorEditor({ markdownSource, documentId, initialSear
+                     // task lists, autolinks. Without this, the parser is pure
+                     // CommonMark and inline-preview never sees Task / Table.
+                     markdown({ base: markdownLanguage, codeLanguages: [...codeLanguages] }),
+-                    // Extend closeBrackets to markdown's symmetric delimiters.
+-                    markdownLanguage.data.of({
+-                        closeBrackets: { brackets: ['(', '[', '{', "'", '"', '*', '_', '`'] },
+-                    }),
++                    // ceibo patch: se quitó el `markdownLanguage.data.of({ closeBrackets })` que
++                    // extendía el auto-cierre a los delimitadores de markdown (autoclosing OFF).
+                     atomicMarkdownSyntax,
+                     atomicEditorTheme,
+                     keymap.of([
+-                        ...closeBracketsKeymap,
++                        // ceibo patch: closeBracketsKeymap quitado (autoclosing OFF).
+                         ...historyKeymap,
+                         ...searchKeymap,
+                         ...markdownKeymap,
+diff --git a/dist/inline-preview.js b/dist/inline-preview.js
+index 94d48d196e21fac09a774cd97b61ed5274ab48b9..c396eaa7a3906dafa7e83a5e91c1139be640e503 100644
+--- a/dist/inline-preview.js
++++ b/dist/inline-preview.js
+@@ -390,7 +390,31 @@ function buildInlineDecorations(view) {
+                         parent = parent.parent;
+                     }
+                     if (parent && parent.name === 'Link') {
+-                        shouldHide = !activeLinkStarts.has(parent.from);
++                        // ceibo patch: con `[https://x](https://y)` GFM autolinkea el LABEL → el
++                        // Link tiene DOS hijos URL (label y destino). Ocultar el URL del label
++                        // borraba el texto visible del link (quedaba sólo el iconito ↗) — de ahí
++                        // el bug "el link no muestra su label". Sólo el DESTINO (último hijo URL)
++                        // se oculta; el label-URL queda siempre visible como texto clickeable.
++                        // Para `[label](url)` normal (un solo hijo URL = el destino) el
++                        // comportamiento no cambia.
++                        if (node.name === 'URL') {
++                            const urls = parent.getChildren('URL');
++                            const dest = urls[urls.length - 1];
++                            const isDest = dest != null && dest.from === node.from && dest.to === node.to;
++                            shouldHide = isDest && !activeLinkStarts.has(parent.from);
++                        }
++                        else {
++                            shouldHide = !activeLinkStarts.has(parent.from);
++                        }
++                    }
++                    else if (node.name === 'URL') {
++                        // ceibo patch: un nodo URL cuyo parent NO es un Link es un AUTOLINK
++                        // crudo de GFM (`https://x` o `mail@dominio` pegados sin markup) — el
++                        // parser los emite como un URL suelto bajo Paragraph. Su texto ES el
++                        // contenido visible: ocultarlo (regla por línea) lo borraba entero y
++                        // el link/mail quedaba INVISIBLE (bugs WIP #2 mail y #3 link crudo).
++                        // Nunca se oculta: el autolink siempre se ve y queda clickeable.
++                        shouldHide = false;
+                     }
+                     else {
+                         shouldHide = !activeLines.has(lineNum);
+@@ -446,8 +470,18 @@ function buildInlineDecorations(view) {
+                 // widths. `padding-left` sets the content column;
+                 // negative `text-indent` of the same magnitude pulls the
+                 // first line back so the marker lands in the alcove.
++                // ceibo patch: el depth se calcula desde el ÁRBOL (cantidad de ListItem
++                // ancestros) en vez de floor(rawIndent/2), que asumía 2 espacios por nivel y
++                // colapsaba con TABs (1 char → depth 0 → sangría imperceptible) y con
++                // indentación de 3/4 espacios (imports de Notion). El parser ya anida bien
++                // (CommonMark trata el tab como 4 columnas). Fallback a la heurística vieja si
++                // por algún motivo no hay ListItem ancestro.
+                 const rawIndent = node.from - line.from;
+-                const depth = Math.max(0, Math.floor(rawIndent / 2));
++                let liDepth = 0;
++                for (let p = node.node.parent; p; p = p.parent)
++                    if (p.name === 'ListItem')
++                        liDepth++;
++                const depth = liDepth > 0 ? liDepth - 1 : Math.max(0, Math.floor(rawIndent / 2));
+                 const BASE_EM = 0.8;
+                 const ALCOVE_EM = 1.2;
+                 const LEVEL_EM = 0.6;

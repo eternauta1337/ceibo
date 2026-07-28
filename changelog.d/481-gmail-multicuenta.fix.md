@@ -1,0 +1,1 @@
+Conectar más de una cuenta del mismo servicio (ej. dos Gmail, "personal" y "trabajo") vuelve a funcionar: antes la segunda cuenta pisaba a la primera y el asistente respondía que no podía leer los mails.

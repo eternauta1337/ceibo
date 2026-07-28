@@ -1,0 +1,1 @@
+Los botones flotantes (orbe, notas/explorador y "+" nota nueva) ahora se agrupan en una columna abajo a la derecha, arriba del botón de chat; al abrir el chat en pantallas grandes se corren hacia arriba para no quedar tapados.

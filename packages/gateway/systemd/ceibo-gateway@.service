@@ -1,0 +1,42 @@
+# Template unit para ceibo-gateway.
+# %i = nombre de instancia (ej. "staging"). Instanciar como: ceibo-gateway@staging.service
+#
+# Instalar en la box (como root):
+#   sudo cp packages/gateway/systemd/ceibo-gateway@.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now ceibo-gateway@staging.service
+#
+# Logs:    journalctl -u ceibo-gateway@staging -f
+# Restart: sudo systemctl restart ceibo-gateway@staging
+
+[Unit]
+Description=ceibo gateway (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=deploy
+
+# Árbol propio por entorno: prod → ~/ceibo, staging → ~/ceibo-staging.
+WorkingDirectory=/home/deploy/ceibo-%i
+
+# .env por entorno. Contiene CEIBO_ENV, ANTHROPIC_API_KEY, AGENT_ID_*, etc.
+EnvironmentFile=/home/deploy/ceibo-%i/.env.%i
+
+# CEIBO_ENV siempre igual al nombre de instancia.
+Environment=CEIBO_ENV=%i
+
+# Puerto de control MCP por entorno (prod 8830, staging 8831).
+Environment=CONTROL_MCP_PORT=8831
+
+ExecStart=/bin/node /home/deploy/ceibo-%i/node_modules/.pnpm/tsx@4.22.3/node_modules/tsx/dist/cli.mjs packages/gateway/src/index.ts
+
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ceibo-gateway-%i
+
+[Install]
+WantedBy=multi-user.target

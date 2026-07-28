@@ -1,0 +1,1 @@
+Test del invariante del chat web (mensajes del agente append-only e inmutables): extraída la construcción de la burbuja a `agentBubble.ts` y cubierta con un test que fija que dos mensajes del mismo turno (link de conexión + respuesta) no se pisan.

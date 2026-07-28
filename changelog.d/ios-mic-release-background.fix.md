@@ -1,0 +1,1 @@
+El micrófono se libera al pasar la app a background (pantalla de inicio) y tras un rato de inactividad. Antes el track quedaba vivo entre turnos y en iOS/WebKit CarPlay lo veía como una "llamada en curso".

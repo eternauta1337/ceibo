@@ -1,0 +1,1 @@
+En iOS, al sacar el foco de la app y volver, el audio ya no queda roto: el orbe vuelve a latir, las respuestas de voz suenan de una (sin tener que salir y entrar) y el volumen no se queda bajo (sale por el parlante, no por el auricular).

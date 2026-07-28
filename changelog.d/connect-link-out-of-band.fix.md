@@ -1,0 +1,1 @@
+Conectar una cuenta (Gmail, agenda, etc.) por chat es más confiable: el link de autorización ahora te llega directo al chat, en vez de depender de que el asistente lo transcriba (antes a veces mandaba un link roto o un placeholder `[auth_url]`).

@@ -1,0 +1,1 @@
+iOS (app instalada en la pantalla de inicio): el botón de cerrar el chat ya no queda tapado por la status bar/batería del iPhone — el header del chat respeta el safe-area superior, así que el botón vuelve a ser tocable en portrait y landscape.

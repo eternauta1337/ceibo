@@ -1,0 +1,1 @@
+Rotación de pantalla: el contenido (orbe / bienvenida / hints) ya no se corre a la izquierda — ni al rotar ni al cargar. Se centra contra el viewport real (mismo mecanismo que el fondo), sin tocar el meta viewport (que en iOS era inestable).

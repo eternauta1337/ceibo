@@ -1,0 +1,14 @@
+{
+  "name": "@ceibo/speech",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "STT/TTS del bridge (channel-agnostic): faster-whisper para transcribir, edge-tts para sintetizar. Shell-out a un venv Python + ffmpeg.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

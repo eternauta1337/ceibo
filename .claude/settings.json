@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(/deploy/**)",
+      "Write(/deploy/**)",
+      "Edit(/secrets/**)",
+      "Write(/secrets/**)",
+      "Edit(/.env)",
+      "Write(/.env)",
+      "Edit(/pnpm-lock.yaml)",
+      "Write(/pnpm-lock.yaml)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/scope-guard.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

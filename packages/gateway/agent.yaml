@@ -1,0 +1,123 @@
+# Agente de ceibo. Este YAML es la fuente LEGIBLE; el `system:` de acá es lo que
+# realmente se publica. Para publicar una versión nueva (desde la box, con el .env
+# del root):
+#   pnpm --filter @ceibo/gateway publish-agent
+#
+# (Primera vez se creó con `ant beta:agents create < agent.yaml`. El update NO lee
+# YAML de stdin, y las URLs de los MCP llevan path secreto → por eso el script lee el
+# bloque `system:` de acá y arma mcp_servers/tools con `buildAgentMcpConfig` de
+# @ceibo/oauth — la MISMA función que usa el gateway para el override per-sesión
+# de multi-cuenta, así base y sesiones no driftan. Toma *_MCP_URL del env y nunca
+# commitea secretos. Los bloques mcp_servers/tools de abajo son SÓLO referencia
+# humana; el builder los reconstruye.)
+#
+# Fase 2c: el agente de chat trabaja las wikis como working copy LOCAL en /workspace/<repo>,
+# hidratada/sincronizada por HTTPS con el script wiki-sync (el git nativo del sandbox cuelga).
+# El toolset de archivos (read/edit/write/grep) opera LOCAL; el chat ya no usa el GitHub MCP
+# (sí lo usa REM). El token de sync —firmado, NO el de GitHub— se monta como archivo.
+# Fase 4: Gmail MCP self-hosted (mcp_oauth); el access_token lo inyecta el vault del
+# usuario (credencial que escribió el enrollment). Sin enrollment, sus tools fallan.
+
+name: ceibo
+model: claude-haiku-4-5-20251001
+description: Asistente personal multi-usuario; mantiene las wikis (repos git) del usuario.
+
+# SUB-AGENTES (Fase 14): el hilo principal (haiku) coordina y delega a un roster de 3
+# workers que SÓLO difieren en el modelo (mismo system/MCPs/tools/skills). El roster
+# real lo arma publish-agent.ts con los AGENT_ID_{LOW,MID,HIGH} del .env (esto de acá
+# es sólo referencia humana). Depth 1: los workers no llevan multiagent (no pueden
+# spawnear a su vez). El coordinador delega por NOMBRE de agente.
+#   worker-low  → haiku   (trabajo mecánico / masivo / simple)
+#   worker-mid  → sonnet  (complejidad intermedia)
+#   worker-high → opus    (razonamiento pesado; caro, usar con criterio)
+multiagent:
+  type: coordinator
+  agents:
+    - worker-low
+    - worker-mid
+    - worker-high
+
+# El system prompt ya NO vive acá: se compone de `prompt/core.md` (agnóstico) + `prompt/
+# adapter-ma.md` (mecánica MA) en publish-agent.ts (ver `prompt/compose.ts`). Los bloques
+# mcp_servers/tools de abajo son SÓLO referencia humana; el builder los reconstruye del env.
+
+mcp_servers:
+  # (Fase 2c: el chat ya NO usa el GitHub MCP — lee/escribe la working copy local y sincroniza
+  # por HTTPS con wiki-sync. REM sí lo usa, en su propio config.)
+  - type: url
+    name: gmail
+    url: ${GMAIL_MCP_URL}
+  - type: url
+    name: calendar
+    url: ${CALENDAR_MCP_URL}
+  - type: url
+    name: drive
+    url: ${DRIVE_MCP_URL}
+  - type: url
+    name: sheets
+    url: ${SHEETS_MCP_URL}
+  - type: url
+    name: notion
+    url: ${NOTION_MCP_URL}
+  # Crons (Fase 8): server propio que escribe a la DB; el Bearer es un token de
+  # identidad firmado por el gateway (no un token de tercero). Cred per-usuario.
+  - type: url
+    name: schedule
+    url: ${SCHEDULE_MCP_URL}
+  # WhatsApp (Fase 9): MCP read-only en el launcher de mcps; Bearer = token de
+  # identidad firmado (igual que schedule). Cred per-usuario, minteada al parear.
+  - type: url
+    name: wacli
+    url: ${WACLI_MCP_URL}
+
+tools:
+  # Fase 2c: agent_toolset con write/edit HABILITADOS — el agente edita la working copy LOCAL
+  # de la wiki (en /workspace/<repo>) y la sube con `node /mnt/session/uploads/wiki-sync.mjs push`. El GitHub
+  # MCP del chat se eliminó (lo usa REM, en su propio config).
+  - type: agent_toolset_20260401
+  # MCPs self-hosted de la familia (gmail/calendar/drive/sheets/notion): cada uno
+  # expone pocas tools a propósito (acotamos el cache write de schemas), así que las
+  # habilitamos todas. Andan sólo si el usuario conectó esa cuenta (vault); si no, la
+  # tool falla con un error de autorización (no rompe la sesión).
+  - type: mcp_toolset
+    mcp_server_name: gmail
+    default_config:
+      enabled: true
+      permission_policy:
+        type: always_allow
+  - type: mcp_toolset
+    mcp_server_name: calendar
+    default_config:
+      enabled: true
+      permission_policy:
+        type: always_allow
+  - type: mcp_toolset
+    mcp_server_name: drive
+    default_config:
+      enabled: true
+      permission_policy:
+        type: always_allow
+  - type: mcp_toolset
+    mcp_server_name: sheets
+    default_config:
+      enabled: true
+      permission_policy:
+        type: always_allow
+  - type: mcp_toolset
+    mcp_server_name: notion
+    default_config:
+      enabled: true
+      permission_policy:
+        type: always_allow
+  - type: mcp_toolset
+    mcp_server_name: schedule
+    default_config:
+      enabled: true
+      permission_policy:
+        type: always_allow
+  - type: mcp_toolset
+    mcp_server_name: wacli
+    default_config:
+      enabled: true
+      permission_policy:
+        type: always_allow

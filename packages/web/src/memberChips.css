@@ -1,0 +1,95 @@
+/* Chips de miembros de una wiki ("compartida con", Fase explorer). Archivo aparte (no
+   index.css) para no chocar con otros cambios en paralelo sobre index.css. Estilo sobrio
+   acorde al lenguaje plano: círculos chicos con iniciales y color estable por usuario. */
+
+.exp-members {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 6px;
+  flex: 0 0 auto;
+}
+
+/* El cluster es un botón (abre el popover con los nombres). Sin chrome de botón. */
+.exp-members-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.exp-member-chip {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 1;
+  /* GRAYSCALE acorde al tema (por ahora): el chip es la mezcla del --fg del tema sobre el
+     --surface; el % de mezcla por usuario (--chip-mix, inline) sólo cambia el tono de gris
+     para distinguirlos. El texto va en --surface → contrasta sobre el gris en claro y oscuro. */
+  color: var(--surface);
+  background: color-mix(in srgb, var(--fg) var(--chip-mix, 68%), var(--surface));
+  user-select: none;
+}
+
+/* Chip con foto (avatar del miembro): mismo tamaño/forma que el de iniciales, pero la imagen
+   ocupa todo el círculo. Un anillo finito acorde al tema lo despega del fondo cuando la foto
+   tiene bordes claros/oscuros. `object-fit: cover` recorta sin deformar. */
+img.exp-member-photo {
+  object-fit: cover;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--line, rgba(127, 127, 127, 0.25)) inset;
+}
+
+/* "+k" cuando hay más miembros que los chips mostrados. */
+.exp-members-more {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--fg-soft);
+  padding-left: 1px;
+}
+
+/* Popover con la lista completa de nombres (tap/click en el cluster). */
+.exp-members-pop {
+  position: fixed;
+  z-index: 50;
+  min-width: 140px;
+  max-width: 220px;
+  padding: 6px;
+  border: 1px solid var(--line, rgba(127, 127, 127, 0.2));
+  border-radius: var(--r-sm);
+  background: var(--panel, #fff);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  font-size: 12px;
+}
+
+.exp-members-pop-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-soft);
+  padding: 2px 4px 4px;
+}
+
+.exp-members-pop-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px;
+  color: var(--fg);
+}
+
+.exp-members-pop-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: color-mix(in srgb, var(--fg) var(--chip-mix, 68%), var(--surface));
+}

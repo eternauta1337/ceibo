@@ -1,0 +1,7 @@
+{
+  "wikis": ["demo-personal"],
+  "cases": [
+    { "query": "comida con la familia el finde", "expected": ["recetas/asado-domingo.md"] },
+    { "query": "cuanto pagamos de colegio", "expected": ["chicos/colegio.md", "finanzas/gastos-fijos.md"] }
+  ]
+}

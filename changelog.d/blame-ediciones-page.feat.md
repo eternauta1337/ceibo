@@ -1,0 +1,1 @@
+El "quién escribió cada línea" (git blame) deja de ser un botón por nota y pasa a ser un toggle global en una nueva página de sistema, "Ediciones". Prendido, muestra la autoría por línea en las notas de wikis compartidas.

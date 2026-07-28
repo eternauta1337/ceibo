@@ -1,0 +1,1 @@
+El orbe en reposo vuelve a ser fluido: se sacó un límite de FPS que, por cómo medía el tiempo contra la pantalla, lo dejaba entrecortado en ~20fps. Ahora va parejo con el resto. (El medidor de FPS del modo debug quedó centrado arriba.)

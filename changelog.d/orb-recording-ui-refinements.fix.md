@@ -1,0 +1,1 @@
+Refinamientos de la UI de grabación del orbe: los textos de ayuda quedan debajo del orbe (sin solaparse con la bienvenida) y la onda + el botón de cancelar quedan dockeados al borde inferior de la pantalla.

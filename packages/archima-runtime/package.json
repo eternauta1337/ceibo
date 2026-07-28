@@ -1,0 +1,14 @@
+{
+  "name": "@ceibo/archima-runtime",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Runtime versionado de archima (control-plane cp.sh + provisioning de VMs libvirt + config de opencode), de-secreteado: la fuente única del runtime que corre en gpuhost, por entorno. Ver Fase 6 del staging-plan (staging-plan-2.md).",
+  "scripts": {
+    "build": "tsx src/build.ts",
+    "diff-box": "tsx src/diff-box.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}

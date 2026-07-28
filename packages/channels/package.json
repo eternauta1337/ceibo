@@ -1,0 +1,21 @@
+{
+  "name": "@ceibo/channels",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Capa de canales de ceibo: contrato channel-agnostic (PostTarget, ChannelPolicy, facts) + canales (telegram, cli, whatsapp) + canal remoto. El gateway los monta; ningún canal importa el core.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "pair-bot": "tsx scripts/pair-bot.ts"
+  },
+  "dependencies": {
+    "@chat-adapter/telegram": "latest",
+    "@ceibo/agent": "workspace:*",
+    "@ceibo/store": "workspace:*",
+    "chat": "^4.24.0"
+  }
+}

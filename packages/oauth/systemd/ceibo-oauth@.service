@@ -1,0 +1,46 @@
+# Template unit para ceibo-oauth.
+# %i = nombre de instancia (ej. "staging"). Instanciar como: ceibo-oauth@staging.service
+#
+# Proceso público detrás del ingress. Maneja enrollment OAuth (Google, etc.).
+# Puerto: prod 8801 (Environment=PORT en la unit de prod), staging 8002 (acá).
+# ⚠️ El PORT va por `Environment=` de la unit, NO en el .env: el .env es compartido por
+# los 4 servicios (symlink .env→.env.staging) y `process.loadEnvFile()` PISA el env de
+# systemd → un PORT en el .env se le filtra a TODOS (oauth y mcps colisionarían). Por eso
+# cada servicio fija su puerto en su unit. (Aprendido montando staging, 2026-06-16.)
+#
+# Instalar en la box (como root):
+#   sudo cp packages/oauth/systemd/ceibo-oauth@.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now ceibo-oauth@staging.service
+#
+# Logs:    journalctl -u ceibo-oauth@staging -f
+# Restart: sudo systemctl restart ceibo-oauth@staging
+
+[Unit]
+Description=ceibo oauth (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=deploy
+
+WorkingDirectory=/home/deploy/ceibo-%i
+
+EnvironmentFile=/home/deploy/ceibo-%i/.env.%i
+
+Environment=CEIBO_ENV=%i
+# Puerto por la unit (NO por el .env compartido — ver cabecera). Staging: 8002.
+Environment=PORT=8002
+Environment=HOST=127.0.0.1
+
+ExecStart=/bin/node /home/deploy/ceibo-%i/node_modules/.pnpm/tsx@4.22.3/node_modules/tsx/dist/cli.mjs packages/oauth/src/server.ts
+
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ceibo-oauth-%i
+
+[Install]
+WantedBy=multi-user.target

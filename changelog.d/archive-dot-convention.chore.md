@@ -1,0 +1,1 @@
+El índice de notas archivadas pasa a llamarse `.archived.md` (antes `_archivado.md`), un archivo oculto. Las wikis viejas siguen funcionando; para renombrar los índices existentes hay un comando de migración.

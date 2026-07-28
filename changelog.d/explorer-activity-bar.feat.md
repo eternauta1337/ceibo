@@ -1,0 +1,1 @@
+El explorador suma una activity bar estilo VS Code (columna de íconos a la izquierda) que conmuta el panel entre el árbol de archivos, las páginas del sistema y las notificaciones. Sistema y notificaciones dejan de ser popups flotantes; el botón de orb/notas pasa a abajo-izquierda y el de nota nueva a arriba-derecha.

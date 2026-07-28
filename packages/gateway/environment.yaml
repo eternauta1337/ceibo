@@ -1,0 +1,15 @@
+# Environment de ceibo: el sandbox cloud donde corre el agente.
+# Reusable entre agentes y sesiones. Se aplica con:
+#   ant beta:environments create < environment.yaml
+# Devuelve un env_... que va en .env como ENV_ID.
+
+name: ceibo-env
+
+config:
+  # cloud = Anthropic corre el contenedor en su infra.
+  type: cloud
+
+  networking:
+    # MVP: egress abierto (instalar paquetes, web_fetch si hiciera falta).
+    # Hardening posterior → "limited" con allowed_hosts.
+    type: unrestricted

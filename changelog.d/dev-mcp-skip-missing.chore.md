@@ -1,0 +1,1 @@
+Interno (dev): el asistente puede montar solo el control MCP sin la flota de MCPs base (gmail/agenda/…) — `buildAgentMcpConfig` saltea los servicios base sin URL en vez de abortar, gateado a `CEIBO_ENV=dev`. Prod/staging sin cambios.

@@ -1,0 +1,17 @@
+<!doctype html>
+<!-- Harness DEV-ONLY del blame por línea: monta el FileEditor REAL (mismas extensiones que
+     la app) con fetch mockeado para /api/file y /api/file/blame. NO entra al build (Vite
+     sólo bundlea index.html); se abre con `pnpm --filter @ceibo/web dev` en
+     http://localhost:5173/harness/blame.html. Validación en browser real (lección de #295:
+     lo headless no alcanza para el editor). -->
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Harness · blame por línea</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./blameHarness.tsx"></script>
+  </body>
+</html>

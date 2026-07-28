@@ -1,0 +1,1 @@
+Los errores del backend local (cold-start de la VM en archima) ya no llegan crudos al chat: un comando (`/new`, `/model`, `/wiki set`) que falla muestra una frase amable y el detalle interno queda en el log.

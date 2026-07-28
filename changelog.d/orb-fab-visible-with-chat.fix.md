@@ -1,0 +1,1 @@
+El botón flotante de orb/notas (minimizar/restaurar notas, abajo a la izquierda) ya no se esconde al abrir el chat: el chat es una tarjeta abajo-derecha y no lo tapa, así que ahora podés minimizar/restaurar tus notas sin cerrar el chat. Sigue oculto cuando el chat está maximizado o en mobile (full-screen), donde no hay lugar.

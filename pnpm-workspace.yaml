@@ -1,0 +1,10 @@
+# Workspace root de ceibo. Corta también la búsqueda de pnpm hacia arriba
+# (hay un pnpm-workspace.yaml en ~/ que si no absorbe estos paquetes).
+packages:
+  - "packages/*"
+
+onlyBuiltDependencies:
+  - esbuild
+  - better-sqlite3
+patchedDependencies:
+  '@atomic-editor/editor@0.4.3': patches/@atomic-editor__editor@0.4.3.patch

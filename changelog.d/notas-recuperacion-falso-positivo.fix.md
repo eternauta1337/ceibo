@@ -1,0 +1,1 @@
+El editor ya no muestra el cartel "recuperé lo que estabas escribiendo" cuando el borrador simplemente continúa la versión vigente (tu propio tipeo sin guardar todavía): solo aparece si el borrador realmente diverge de lo que hay en el server. Antes saltaba seguido al editar o reorganizar notas en un solo dispositivo.

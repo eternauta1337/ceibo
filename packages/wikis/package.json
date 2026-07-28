@@ -1,0 +1,21 @@
+{
+  "name": "@ceibo/wikis",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Substrato de wikis: crea/hostea las wikis de usuarios (repos git) y mintea tokens efímeros scoped. Backend hoy: GitHub App.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@octokit/app": "^16.1.2"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.6"
+  }
+}

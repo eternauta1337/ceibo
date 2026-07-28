@@ -1,0 +1,1 @@
+El orbe ahora reacciona al instante al tocarlo, sin esperar a que el micrófono esté listo: se acabó el "toco y no pasa nada hasta que toco varias veces". Y tocar varias veces seguidas ya no encola turnos: arranca una sola grabación.

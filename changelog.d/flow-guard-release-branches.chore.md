@@ -1,0 +1,1 @@
+El flow-guard de CI ahora acepta branches de resolución `release/staging-*` y `release/main-*` como origen de promoción (no solo `dev`/`staging`), para destrabar promociones que conflictúan por squash-merges previos.

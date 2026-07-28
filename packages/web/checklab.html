@@ -1,0 +1,18 @@
+<!doctype html>
+<!-- Harness manual para el bug del PRIMER checkbox en una nota nueva (NO va al build de
+     prod: vite build solo toma index.html). Monta AtomicCodeMirrorEditor con las MISMAS
+     extensiones que Editor.tsx, sobre una nota VACÍA, para reproducir en un browser real
+     la intermitencia "en la 1er línea a veces sale el checkbox y a veces queda markdown".
+     Permite togglear un fix candidato y provocar la race. Ver src/checklab.tsx.
+     Uso: pnpm --filter @ceibo/web dev → http://localhost:5173/checklab.html -->
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>checklab — bug del 1er checkbox</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/checklab.tsx"></script>
+  </body>
+</html>

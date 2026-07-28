@@ -1,0 +1,1 @@
+El ruido del orbe usa 2 octavas en vez de 3 (la operación más cara del shader): frames más baratos en mobile sin cambiar la silueta de la animación. Además, con el modo debug activado aparece un medidor de FPS del orbe (diagnóstico).

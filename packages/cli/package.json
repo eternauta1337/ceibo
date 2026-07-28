@@ -1,0 +1,18 @@
+{
+  "name": "@ceibo/cli",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "CLI de administración de ceibo sobre el store: usuarios, canales, repos, reporte de gasto.",
+  "scripts": {
+    "cli": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ceibo/oauth": "workspace:*",
+    "@ceibo/store": "workspace:*",
+    "@ceibo/wikis": "workspace:*",
+    "resend": "^6.12.2"
+  }
+}

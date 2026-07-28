@@ -1,0 +1,5918 @@
+/* Paleta CLARA (default). Look plano estilo Obsidian (backlog `tecnico/backlog.md`):
+   superficies grises neutras planas, SIN gradientes ni glow, acento violeta sobrio.
+   El tema se controla con `data-theme` en <html> (#24): sin atributo = "auto" (sigue al
+   sistema vía la media query de abajo); "light"/"dark" fuerzan. Los componentes usan SIEMPRE
+   estas vars (nada de hex hardcodeados de superficie) para que el dark mode salga gratis. */
+:root {
+  color-scheme: light;
+  /* Tema claro = paleta CELESTE "amanecer del ceibo" (no blanco). Powder blue de fondo, paneles
+     un tono más claro, texto slate oscuro (legible), acento ember (rojo de la flor). */
+  --bg: #cfe0eb; /* canvas: celeste/powder blue */
+  --panel: #e6eff4; /* nota / panel: celeste muy claro */
+  --fg: #2b343c; /* texto (slate oscuro azulado) */
+  --fg-soft: #57636e; /* secundario (gris-azulado) — oscurecido #66727d→#57636e para WCAG AA (P1-5) */
+  /* Acento = la flor ember (amanecer del ceibo). SIN violeta: links, checkbox, selección,
+     foco. Atado a --ember para una sola fuente de verdad del color de marca. */
+  --accent: var(--ember);
+  --accent-deep: var(--ember-deep);
+  --danger: #c0392b; /* semántico: conflicto / error / logout */
+  /* El orbe (la flor viva) conserva su color cálido propio — es el único elemento de marca
+     que queda; el resto del chrome es neutro. Lo lee el shader/canvas vía getComputedStyle. */
+  --ember: #ef623a;
+  --ember-deep: #c23d22;
+  --line: #b7ccda; /* borde sobre el canvas (azul suave) */
+  --line-panel: #c7d8e4; /* borde dentro del panel */
+  --code-bg: #d7e4ed;
+  --surface: #c6d9e6; /* fondo de inputs / botones / discos (azul apagado) */
+  --surface-muted: #d3e0ea; /* input deshabilitado */
+  --hover: #d6e5ef; /* fondo al hover */
+  --active: color-mix(
+    in srgb,
+    var(--ember) 15%,
+    var(--panel)
+  ); /* archivo abierto: rojo suave (ember) de ceibo */
+  --active-hover: color-mix(in srgb, var(--ember) 25%, var(--panel));
+  /* Fondo de la selección de texto. DEBE vivir en :root (no sólo en .editor): el theme de
+     Atomic lo lee en una regla `::selection` GLOBAL (var(--atomic-editor-selection-bg,
+     <gris oscuro>)); si la var sólo existiera dentro de .editor, fuera de ahí caía al
+     fallback oscuro (negro sobre texto) — el bug de #25. Tinte ember claro, legible. */
+  --atomic-editor-selection-bg: color-mix(in srgb, var(--accent) 30%, var(--panel) 70%);
+  /* Ancho de la barra de texto (centrada abajo). Lo comparte el orbe flotante para
+     anclarse justo a la derecha del botón de enviar (ver .dock-floating). */
+  --textbar-w: min(28rem, calc(100vw - 12rem));
+  /* Ancho del chat popup en desktop. Reserva una columna izquierda mínima para que el launcher
+     de configuración siga visible aun en viewports angostos que todavía no son mobile. */
+  --chat-panel-w: min(28rem, calc(100vw - 6rem));
+  /* Tamaño común de los botones de acción (menu, +, cog, send, cerrar). */
+  --btn: 2.75rem;
+  /* Margen de esquina de los botones flotantes de chrome (FABs en mobile + ✕ de cierre del chat):
+     equidistante de sus dos bordes. El safe-area lo agranda en notch. UN solo valor → consistencia. */
+  --gap-btn: 0.45rem;
+  /* Alto de la barra superior (header) — el MISMO para el explorador y la vista de notas, así
+     todo el chrome (logo+versión, menú, mini-orb, "+") queda centrado verticalmente en esa
+     franja. Los tabs son la excepción: van pegados ABAJO (fundidos con la nota). */
+  --header-h: calc(4rem - 10px);
+  /* Tipografía: Inter Tight, la misma que la landing (marca unificada). Una sola familia
+     para todo; la itálica (display) es "la voz" (títulos / caption / tagline / hint).
+     Self-hosted vía Fontsource (ver main.tsx). */
+  --font-display: "Inter Tight Variable", system-ui, -apple-system, sans-serif;
+  --font-body: "Inter Tight Variable", system-ui, -apple-system, sans-serif;
+  /* Escala de radios (P2-9): 4 tokens cubren todos los contextos.
+     --r-sm  : filas/items/inputs inline/selects/botones (antes: 4,6,7,8 px)
+     --r-md  : tabs (solo arriba), menús, burbujas de chat (antes: 0.55rem,10px,14px)
+     --r-lg  : panels vidrio (settings, chat, cron modal)   (antes: 16px)
+     --r-pill: píldoras / pills                             (antes: 999px / 50%) */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-pill: 999px;
+  /* Semánticos de estado (P3-12): success simétrico a danger. */
+  --success: #2e9e5b;
+}
+
+/* Paleta OSCURA: gris carbón neutro (poco azul, #28), texto claro, la flor ember sigue
+   siendo el acento. Se aplica cuando data-theme="dark" (forzado) o cuando el
+   sistema está en dark y NO hay override (auto). El bloque se repite para que el override
+   explícito gane sobre la media query. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1a1a1c; /* canvas / sidebar (gris carbón plano, obs1) */
+  --panel: #1e1e20; /* nota — un punto más claro que el canvas */
+  --fg: #dcddde;
+  --fg-soft: #888b91;
+  --accent: var(--ember); /* acento = ember; sin violeta */
+  --accent-deep: var(--ember-deep);
+  --danger: #e06c5e;
+  --ember: #f06a42;
+  --ember-deep: #cf4a2a;
+  --line: #2c2c2f;
+  --line-panel: #333336;
+  --code-bg: #28282b;
+  --surface: #2a2a2d;
+  --surface-muted: #232326;
+  --hover: #2e2e32;
+  --active: color-mix(
+    in srgb,
+    var(--ember) 22%,
+    var(--panel)
+  ); /* seleccionado: rojo suave (ember) de ceibo */
+  --active-hover: color-mix(in srgb, var(--ember) 32%, var(--panel));
+  --atomic-editor-selection-bg: color-mix(in srgb, var(--accent) 30%, var(--panel) 70%);
+  --success: #3db87a; /* éxito dark: más claro para contrastar sobre carbón */
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #1a1a1c;
+    --panel: #1e1e20;
+    --fg: #dcddde;
+    --fg-soft: #888b91;
+    --accent: var(--ember);
+    --accent-deep: var(--ember-deep);
+    --danger: #e06c5e;
+    --ember: #f06a42;
+    --ember-deep: #cf4a2a;
+    --line: #2c2c2f;
+    --line-panel: #333336;
+    --code-bg: #28282b;
+    --surface: #2a2a2d;
+    --surface-muted: #232326;
+    --hover: #2e2e32;
+    --active: color-mix(in srgb, var(--ember) 22%, var(--panel));
+    --active-hover: color-mix(in srgb, var(--ember) 32%, var(--panel));
+    --atomic-editor-selection-bg: color-mix(in srgb, var(--accent) 30%, var(--panel) 70%);
+    --success: #3db87a;
+  }
+}
+
+/* Selección de texto legible en ambos temas (#25): mismo tinte que el editor (la var de
+   :root) + texto en el fg del tema. Antes el ::selection nativo del theme de Atomic caía
+   a un gris oscuro (negro sobre texto). */
+::selection {
+  background: var(--atomic-editor-selection-bg);
+  color: var(--fg);
+}
+* {
+  box-sizing: border-box;
+}
+/* Reset tipográfico: hereda font de marca en controles nativos (P0-1). Sin esto, ~78
+   button/input/select/textarea caen a Arial (explorer, FABs, composer). Las reglas
+   con clase siguen ganando por especificidad. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+/* Foco visible global para navegación por teclado (P1-4 — WCAG 2.4.7). Solo aplica
+   cuando el browser detecta foco por teclado (:focus-visible), no al click/tap.
+   Los inputs con :focus border-change y outline:none explícito no se ven afectados. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  /* Mata el rubber-band a nivel DOCUMENTO de iOS Safari. Sin esto, un overscroll agresivo del
+     scroller interno (.view-body / .explorer-body) encadena al documento, que rebota; y como
+     .view es position:fixed, ese rebote arrastra y RECORTA la barra de pestañas contra el chrome
+     del browser (tabs huérfanas/cortadas arriba). Combinado con overscroll-behavior:contain en
+     los scrollers de abajo. No afecta desktop (no hay bounce). */
+  overscroll-behavior: none;
+}
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--fg);
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* #root va `position: fixed` para que viewportRotateFix.ts pueda fijarle el ANCHO en px desde
+   visualViewport: un fixed con ancho explícito NO lo recorta `body{overflow:hidden}` (que está
+   atado al ICB que iOS deja stale al rotar). Así `.app` (height:100% adentro) recupera el ancho
+   real y re-centra orbe/bienvenida/hints. El ancho 100% es solo fallback pre-JS / sin
+   visualViewport (en carga inicial el ICB no está stale, así que 100% ya es correcto). */
+#root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  /* deja respiración para la barra de texto fija abajo (no la pisa cuando hay caption
+     larga sin nota abierta). */
+  padding: 2rem 2rem 7rem;
+  /* Ancho del panel del chat (corner card). Debe seguir a `.chatpanel`. Con el chat abierto el
+     cuerpo de la nota reserva este ancho a la derecha para recentrar la columna legible en el
+     hueco [borde-izq de la nota ↔ borde-izq del chat]. Ver `.app-chat .view-body`. */
+  --chat-w: min(28rem, calc(100vw - 1.5rem));
+}
+/* Fondo en TODA la app, también con una nota abierta: la nota/explorer/chat son translúcidos
+   (.view ~80-95%), así que la transparencia sigue mostrando el fondo a través.
+
+   Va en una capa propia `#app-bg` (no en `.app`) y `position: fixed`: el ancho lo fija JS
+   desde visualViewport (ver viewportRotateFix.ts), que NO queda stale al rotar como sí le
+   pasa al box en flujo de `.app` (atado al layout viewport/ICB que iOS deja pegado) — eso
+   dejaba la banda gris a la derecha. Fixed + ancho explícito no lo recorta `body{overflow:hidden}`.
+   z-index:-1 → detrás del contenido de #root pero por delante del fondo del body; el
+   backdrop-filter de `.view` sigue tomándolo como backdrop y lo blurea igual.
+
+   `#app-bg` pinta el COLOR SÓLIDO del theme (var(--bg)): es lo que se ve antes de que llegue
+   Unsplash, y el fondo DEFINITIVO cuando Unsplash no llega / está offline (sin foto, cero flash
+   negro). Cambia con el theme (data-theme se setea pre-paint en index.html). La FOTO de Unsplash
+   vive en la sub-capa `#app-bg-img`; el ancho lo fija viewportRotateFix.ts sobre `#app-bg` y la
+   sub-capa lo hereda (inset:0). */
+#app-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%; /* fallback pre-JS / sin visualViewport; JS lo pisa con el ancho real en px */
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--bg);
+}
+/* Foto de Unsplash. Blur-up progresivo:
+   - Arranca oculta (opacity:0). El JS pone data-ready cuando hay algo que mostrar.
+   - data-ph (placeholder LQIP de 32px): se ve borrosa (blur + scale para tapar los bordes del
+     blur) — pinta al instante, ~3KB.
+   - Sin data-ph (full-res ya decodeada): se saca el blur. La transición de filter+opacity hace
+     el des-blur/fade suave. */
+#app-bg-img {
+  position: absolute;
+  inset: 0;
+  background-image: var(--orb-bg);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transform: scale(1.06); /* tapa los bordes que el blur deja translúcidos */
+  transition:
+    opacity 0.5s ease,
+    filter 0.5s ease,
+    transform 0.5s ease;
+}
+#app-bg-img[data-ready] {
+  opacity: 1;
+}
+#app-bg-img[data-ph] {
+  filter: blur(24px);
+}
+#app-bg-img[data-ready]:not([data-ph]) {
+  transform: scale(1); /* la full nítida vuelve a escala 1 (sin recorte) */
+}
+
+.orb-bg-debug {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 10000;
+  max-width: min(32rem, calc(100vw - 24px));
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(20, 20, 22, 0.88);
+  color: #fff;
+  font:
+    11px ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace;
+  line-height: 1.35;
+  pointer-events: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Dock del orbe: por default columna centrada (orbe grande, hint/caption debajo).
+   Con nota abierta pasa a "flotante chico" fijo abajo-izquierda — la barra de texto
+   queda en el centro y el FAB "+" a la derecha. */
+.dock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  /* Ancla del saludo absoluto (no empuja el orbe). */
+  position: relative;
+  /* Por encima de la talkzone (z:1) para que el orbe/hint se PINTEN arriba, pero el dock NO
+     intercepta el tacto (pointer-events:none): así los presses sobre el orbe/fondo caen en la
+     talkzone de atrás. Los hijos interactivos lo re-habilitan. */
+  z-index: 2;
+  pointer-events: none;
+}
+/* El orbe (Modo A) es sólo visual: los presses caen en la talkzone. */
+.dock .orb {
+  pointer-events: none;
+}
+/* Zona de hablar a pantalla completa (Modo A, sin nota): cubre el viewport DETRÁS del orbe y de
+   los botones (que van con z-index mayor → un tap en un botón hace lo del botón, no hablar).
+   Mantené apretado en cualquier lado → el orbe vuela al dedo y graba; soltá → vuelve al centro. */
+.talkzone {
+  position: fixed;
+  inset: 0;
+  /* POR ENCIMA del canvas del orbe (z:1). Crítico para iOS (incl. Chrome iOS = WebKit): el
+     long-press dispara el menú "guardar imagen" del browser SOBRE EL <canvas> (que iOS trata como
+     imagen) y eso CANCELA el pointer del push-to-talk → se corta el audio. `-webkit-touch-callout`
+     no lo frena en Chrome iOS. Poniendo esta capa transparente (un <div>, no una imagen) ENCIMA del
+     canvas, el hit-test del long-press cae en el div → no hay imagen que ofrecer → no hay menú. El
+     push-to-talk no cambia (esta misma capa ya maneja los presses). El wrap de handsfree va más
+     arriba (z:4) para que su botón de cancelar siga clickeable. */
+  z-index: 3;
+  /* Vive dentro de .dock (pointer-events:none) → re-habilitamos el tacto EXPLÍCITO acá, si no
+     heredaría `none` y no recibiría los presses. */
+  pointer-events: auto;
+  /* push-to-talk en touch: sin scroll/gestos del browser mientras arrastrás. */
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Wrapper del orbe: centrado por el dock. Durante el swipe-up se desplaza verticalmente
+   con el dedo (transform: translateY via style inline, sin transición → 1:1). Al soltar
+   (orbDragDy vuelve a 0) la clase .orb-mover-returning activa la transición de retorno. */
+.orb-mover {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  /* Hint pegado más cerca del orbe (CAMBIO 4: 0.85rem → 0.4rem). */
+  gap: 0.4rem;
+  /* Necesario para que .handsfree-wave-wrap absolute se ancle a este contenedor. */
+  position: relative;
+}
+/* Transición suave de vuelta al centro tras soltar el dedo o salir de manos libres.
+   Solo activa cuando orbDragDy===0 (ver App.tsx) para que el drag sea 1:1 sin lag. */
+.orb-mover-returning {
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+@media (prefers-reduced-motion: reduce) {
+  .orb-mover-returning {
+    transition: none;
+  }
+}
+
+/* Saludo de bienvenida sobre el orbe (estilo Claude). Tipografía grande de la "voz" del ceibo,
+   posicionado ABSOLUTO arriba del dock para no mover el orbe al entrar/salir. Entra con un fade
+   + rise, respira suave (reactive), y se va elegante (greeting-leaving) al primer habla. */
+.greeting {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  /* 1cm más abajo que antes (margin-bottom era 1.25rem) → el saludo baja hacia el orbe. */
+  margin: 0 0 calc(1.25rem - 1cm);
+  padding: 0 1.25rem;
+  text-align: center;
+  pointer-events: none;
+  z-index: 2;
+  font-family: var(--font-display);
+  /* Peso liviano editorial (400, como la landing) + tracking más cerrado — P1-6 del review
+     de diseño. El 600 anterior era compensación de contraste sin scrim; CON el scrim radial
+     del orbe (ver .dock:not(.dock-floating)::before) el liviano aguanta sobre foto. Va
+     ACOPLADO al scrim: si el scrim se revierte, volver a 600 / -0.015em. */
+  font-weight: 400;
+  /* 8% más grande que antes (1.5/2.5rem → 1.62/2.7rem). */
+  font-size: clamp(1.62rem, 4.86vw, 2.7rem);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  /* SIEMPRE blanco (independiente del tema) + sombra negra sutil para que se lea sobre las
+     partes claras de la imagen de fondo. */
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  text-wrap: balance;
+  animation: greet-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.greeting-inner {
+  display: inline-block;
+  animation: greet-breathe 5s ease-in-out infinite;
+}
+.greeting-leaving {
+  animation: greet-out 0.6s ease forwards;
+}
+@keyframes greet-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes greet-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+@keyframes greet-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.94;
+  }
+  50% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .greeting,
+  .greeting-inner {
+    animation: none;
+  }
+}
+/* Pantalla "sólo voz" (sin nota): el dock centra el orbe (único contenido de la ventana
+   principal — la transcripción y las respuestas viven en el chat). Limitamos a la altura
+   disponible por las dudas. */
+.dock:not(.dock-floating) {
+  max-height: 100%;
+  min-height: 0;
+  width: 100%;
+  gap: 1.5rem;
+}
+/* Con nota abierta: el orbe chico se ancla a la DERECHA del botón de enviar, mismo
+   tamaño que él (2.5rem) y a la misma altura — queda como un control más de la barra
+   de texto. (El FAB "+" no aparece con nota abierta, así que no compite por la esquina.) */
+.dock-floating {
+  position: fixed;
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  left: calc(50% + var(--textbar-w) / 2 + 0.4rem);
+  z-index: 10;
+  gap: 0;
+}
+
+/* El orbe = la flor del ceibo (rojo) sobre el cielo. touch-action none para que el hold
+   no scrollee en mobile. */
+.orb {
+  /* Dimensión de referencia para el tamaño: por defecto vmin; con el explorer abierto pasa
+     a ser el ANCHO DISPONIBLE (ver .app-explorer), así el orbe mantiene su ratio en vez de
+     saltar a un tamaño fijo chico. */
+  --orb-ref: 100vmin;
+  /* Tamaño fijo grande (el owner lo pidió así): ~80% de la referencia, topeado en 30rem en
+     pantallas grandes. Antes se achicaba con el largo del diálogo, pero la ventana principal
+     ya no muestra texto bajo el orbe → tamaño constante. */
+  --size: clamp(8rem, calc(0.8 * var(--orb-ref)), 30rem);
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  border: none;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  /* Hold-to-talk sobre un canvas: en mobile el long-press disparaba el callout/menú de
+     "guardar imagen" (Chrome Android) y la selección/lupa (iOS). Lo desactivamos. */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Sólo el transform transiciona (feedback de press). El CAMBIO DE TAMAÑO (grande→botón
+     al abrir una nota) es WARP INSTANTÁNEO: sin transición de width/height. */
+  transition: transform 0.18s ease;
+}
+.orb:disabled {
+  cursor: default;
+}
+/* Cue de PRESS instantáneo (full WebGL): al tocar marcamos `.orb-armed` SINCRÓNICO en el gesto y
+   disparamos un pulso de escala rápido y snappy en el contenedor. Es CSS puro (transform en el
+   compositor) → se SIENTE al instante, sin depender del morph del shader (cuyo lerp de params es
+   suave/lento ~600ms). Da el "click físico" del toque mientras el plasma arranca a reaccionar por
+   detrás. Scope full: en `.dock-floating` (nota abierta, círculo CSS) ya manda `.orb-recording`. */
+.dock:not(.dock-floating) .orb-armed {
+  animation: orb-press 0.28s ease-out;
+}
+@keyframes orb-press {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(0.93);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+/* El disco: bola BLANCA sobria (matchea el orbe WebGL, que arranca como disco sólido blanco).
+   Antes era ember (rojo) y parpadeaba como un punto rojo mientras inicializaba el WebGL. */
+.orb-core {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 32%, #fff, #d6d6db 75%);
+}
+/* Orbe WebGL (plasma): el shader pinta la superficie viva; el círculo lo da el CSS. Sin
+   halo/box-shadow (plano). */
+.orb-canvas {
+  display: block;
+  /* El canvas es MÁS GRANDE que el botón (150%) y desborda centrado: el orbe ocupa ~2/3 y
+     los picos largos del visualizador brotan hacia el espacio vacío sin cortarse. Como el
+     WebGL compone sobre el --bg, el desborde es invisible salvo donde hay líneas. */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  /* El canvas NO recibe pointer events: que todos caigan en el <button> del orbe, así el
+     setPointerCapture (hold-to-talk) captura limpio y el `up` no se "pierde" en el hijo. */
+  pointer-events: none;
+  /* Long-press del canvas en mobile = menú "guardar imagen": lo desactivamos (además del
+     listener nativo de contextmenu en OrbCanvas y el onContextMenu del <button>). */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Arranca invisible y aparece recién cuando el WebGL pinta su primer frame (core.ts pone
+     opacity:1): así no se ve el "cuadrado blanco" del lienzo antes de la primera limpieza. */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  /* El WebGL compone el orbe sobre el --bg de la página (lo lee OrbCanvas), así el
+     lienzo cuadrado calza exacto con la página → sin disco ni cuadrado ni seam, sin
+     blend modes (que se rompen con stacking contexts al animarse). */
+}
+
+/* Orbe chico cuando flota sobre la vista de wiki (overrides después de la base).
+   Mismo tamaño que los botones (.textbar-send, etc.) para que hagan juego. Sin glow
+   con nota abierta (backlog: "orb con página abierta sin glow"). */
+.dock-floating .orb {
+  --size: var(--btn);
+}
+/* Con nota abierta el orbe es un círculo SÓLIDO plano (sin WebGL, sin lienzo cuadrado),
+   coloreado por estado con la misma consistencia que el plasma:
+     ROJO = disponible (idle + apretándolo) · GRIS = pensando/conectando · ÁMBAR = hablándome
+     (sin violeta en ningún lado).
+   P3-12: estos colores NO usan --ember ni --fg-soft deliberadamente. Son más saturados que
+   los tokens del tema porque el orbe flotante es un elemento de marca que debe leerse sobre
+   cualquier fondo fotográfico (claro u oscuro). --ember (#ef623a) sería demasiado "naranja"
+   en pequeño; este rojo (#ef2d18) es más puro y legible al tamaño --btn. */
+.dock-floating .orb-core {
+  background: #ef2d18; /* idle + recording: rojo vivo (saturado a propósito) */
+}
+.dock-floating .orb-speaking .orb-core {
+  background: #ff9a4d; /* hablando: ámbar cálido (saturado a propósito, NUNCA violeta) */
+}
+.dock-floating .orb-thinking .orb-core,
+.dock-floating .orb-connecting .orb-core,
+.dock-floating .orb-unauth .orb-core {
+  background: #8a8b94; /* gris neutro (legible en claro y oscuro; más saturado que --fg-soft) */
+}
+
+/* ---- TAMAÑO / MOVIMIENTO POR ESTADO ----
+   FULL (WebGL): el shader (OrbCanvas) hace color + TAMAÑO (u_zoom: pensando 25%, grabando/
+   hablando 130%) + movimiento. El .orb NO lleva transform en full → no se duplica.
+   Lo de abajo aplica al círculo CSS: el FLOTANTE (nota abierta) y el fallback sin WebGL. */
+
+/* idle: respira suave (el círculo CSS). */
+.orb-idle .orb-core {
+  animation: breathe 4s ease-in-out infinite;
+}
+/* connecting / unauth: respira suave. La app no usa este estado para permisos de micrófono. */
+.orb-connecting .orb-core,
+.orb-unauth .orb-core {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* FLOATING (nota abierta), círculo sólido CSS — tamaños/vibración por estado:
+   apretar/grabar = mínimo (5% más grande que el botón, rojo); pensando = 60%;
+   hablando = vibra ~5% (rítmico). */
+.dock-floating .orb-pressed,
+.dock-floating .orb-recording {
+  transform: scale(1.05);
+}
+.dock-floating .orb-thinking {
+  transform: scale(0.6);
+}
+.dock-floating .orb-speaking {
+  animation: orb-vibrate 0.5s ease-in-out infinite;
+}
+@keyframes orb-vibrate {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+/* Feedback de grabación: pulso de escala (motion, no glow — look plano). */
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+@keyframes orbit {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@keyframes think-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+/* speaking: pulso suave de escala (sin ondas/box-shadow). */
+@keyframes speak {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Login (Fase 4.5): pantalla DEDICADA (reemplaza el shell del orbe cuando no hay sesión).
+   Card centrada con marca + botón "Entrar con Google" + aviso opcional de no-autorizado. */
+.login-screen {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  /* Fondo plano (look Obsidian, sin atmósfera ni gradientes). */
+  background: var(--bg);
+  overflow: hidden;
+}
+.login-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  max-width: 22rem;
+  width: 100%;
+  text-align: center;
+}
+/* Marca del login: orbe estático en estado idle — evoca el orbe real de la app.
+   Gradiente esférico ember (igual que el orb-core del dock pero en cálido en vez de blanco):
+   highlight en 35%/32%, cae a un tono más profundo en el borde. Pulso suave de "respira". */
+.login-mark {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 32%,
+    color-mix(in srgb, var(--accent) 60%, #fff) 0%,
+    var(--accent) 45%,
+    color-mix(in srgb, var(--accent) 85%, #000) 100%
+  );
+  box-shadow: 0 0 1.5rem 0.25rem color-mix(in srgb, var(--accent) 28%, transparent);
+  animation: breathe 4s ease-in-out infinite;
+}
+/* Punto ember del wordmark del login (igual que .exp-brand-dot del explorer). */
+.login-brand-dot {
+  color: var(--ember);
+}
+.login-title {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 9vw, 2.9rem);
+  /* P1-6: peso display liviano, como la landing (300-itálica/200). 450 en el wordmark del login
+     es un punto medio sobrio: más liviano que 600, sin llegar al 300 que pide un scrim de fondo. */
+  font-weight: 450;
+  font-optical-sizing: auto;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: var(--fg);
+}
+.login-sub {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  /* Voz display de la landing: itálica + peso liviano + tracking negativo (serena, editorial). */
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+  color: var(--fg-soft);
+}
+.login-denied {
+  margin: 0;
+  color: var(--danger);
+  font-family: var(--font-display);
+  font-style: normal;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.login-google {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.4rem;
+  padding: 0.8rem 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--line) 70%, var(--fg-soft));
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+.login-google:hover {
+  background: var(--hover);
+}
+.login-google-g {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: #4285f4; /* azul Google */
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+/* Aclaración bajo el botón de Google: deja claro que también sirve para registrarse. */
+.login-hint {
+  margin: 0.55rem 0 0;
+  max-width: 22rem;
+  text-align: center;
+  color: var(--fg-soft);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+/* Bienvenida intención-primero: botones grandes "Ya tengo cuenta" / "Quiero crear una cuenta".
+   Mismo lenguaje visual que el pill de Google, en bloque full-width. */
+.login-choice {
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--line) 70%, var(--fg-soft));
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.login-choice:hover {
+  background: var(--hover);
+}
+/* "‹ Volver": navegación discreta arriba-izquierda de la card. */
+.login-back {
+  align-self: flex-start;
+  margin: 0;
+  padding: 0.2rem 0;
+  border: none;
+  background: none;
+  color: var(--fg-soft);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.login-back:hover:not(:disabled) {
+  color: var(--fg);
+}
+.login-back:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Login por email + contraseña (método primario, sin Google). */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  margin-top: 0.4rem;
+}
+.login-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: var(--surface);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+.login-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.login-input:disabled {
+  opacity: 0.6;
+}
+.login-submit {
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--accent-deep); /* P0-3: ember-deep → WCAG AA (5.3:1 light, 4.5:1 dark) */
+  color: var(--bg);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+.login-submit:hover:not(:disabled) {
+  background: var(--accent); /* hover sube a ember claro */
+}
+.login-submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+/* Acción secundaria del form (toggle password ↔ magic link): link discreto, sin caja. */
+.login-alt {
+  margin-top: 0.1rem;
+  padding: 0.2rem;
+  border: none;
+  background: none;
+  color: var(--fg-soft);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.login-alt:hover:not(:disabled) {
+  color: var(--fg);
+}
+.login-alt:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+/* Confirmación tras pedir el magic link (reemplaza el form). Mismo texto exista o no la cuenta. */
+.login-sent {
+  margin: 0.4rem 0 0;
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.login-sent strong {
+  font-weight: 600;
+  word-break: break-all;
+}
+
+/* Separador "o" entre el form y el botón de Google. */
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  margin: 0.3rem 0;
+  color: var(--fg-soft);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+.login-divider::before,
+.login-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* Pantalla /invitacion: comparte la estructura .login-screen / .login-card.
+   Clases propias para el cuerpo del mensaje y variantes de color. */
+.invite-subtitle {
+  margin-bottom: 0.2rem;
+}
+/* Texto central de la pantalla de invitación: cuerpo principal del mensaje. */
+.invite-body {
+  margin: 0.6rem 0 0;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--fg);
+  text-align: center;
+}
+.invite-body strong {
+  font-weight: 600;
+}
+/* Texto de apoyo / aclaración bajo el mensaje principal. */
+.invite-hint {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--fg-soft);
+  text-align: center;
+}
+/* Estado muted: cargando / procesando. */
+.invite-muted {
+  color: var(--fg-soft);
+  font-style: italic;
+}
+/* Estado de error (link inválido / falla de red). */
+.invite-error {
+  color: var(--danger);
+}
+/* Estado positivo: anotado / ya en lista. */
+.invite-ok {
+  color: var(--accent-deep);
+}
+/* Botón de aceptar: full-width ember, igual que .login-submit pero con margen superior. */
+.invite-accept {
+  margin-top: 0.8rem;
+  width: 100%;
+}
+/* CTA post-accept "Entrar a la app": pill igual que .login-google pero centrado. */
+.invite-cta {
+  margin-top: 0.8rem;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Vista de editor: panel full-screen activo con cualquier página (nota O sistema). */
+.app-page {
+  justify-content: flex-start;
+  padding: 0;
+}
+.view {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  /* Base = nivel de la BARRA de pestañas. MISMA opacidad que el explorador (80%) para que
+     ambos chromes se vean iguales. El cuerpo de la nota (.view-body), la fila de flechas
+     (.view-nav) y la pestaña ACTIVA (.tab-active) pintan una capa más opaca ENCIMA
+     (var(--panel) 88% → casi sólido), así la barra sigue más transparente que la nota y la
+     tab activa queda unida al cuerpo. */
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--fg);
+  z-index: 5;
+}
+/* Modo home: hay tabs abiertas pero ninguna activa → sólo la tira de pestañas se muestra
+   arriba; el orb grande y el resto del dock quedan visibles detrás. La vista se reduce a la
+   altura de la barra de pestañas (bottom:auto) y el fondo pasa a ser transparente (pointer-
+   events sigue activo sobre la tira; el área bajo la barra NO bloquea el dock/talkzone). */
+.view-home {
+  bottom: auto;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  pointer-events: none; /* el área vacía bajo la tira no captura eventos del dock */
+}
+.view-home .view-head-tabs {
+  pointer-events: auto; /* la tira sí es interactiva */
+}
+.view-head {
+  position: relative; /* para centrar el mini-orb (absoluto) en la barra */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  padding-top: max(1rem, env(safe-area-inset-top));
+  /* Sin fondo propio ni línea: hereda la translucidez de la nota (.view ~90%) → el top bar
+     tiene la misma transparencia que el cuerpo, uniforme. */
+  background: transparent;
+}
+.view-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.view-title strong {
+  font-size: 1.05rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Botón que envuelve el título: sin chrome, solo cursor pointer + hover sutil. */
+.view-title-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  cursor: text;
+  color: inherit;
+  font: inherit;
+}
+.view-title-btn:hover strong {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}
+/* Input que aparece al renombrar (mismo tamaño visual que el strong). */
+.view-title-input {
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-family: inherit;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  background: var(--surface);
+  color: var(--fg);
+  min-width: 0;
+}
+.view-title-input:focus {
+  outline: none;
+}
+.view-path {
+  font-size: 0.75rem;
+  color: var(--fg-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.view-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+}
+/* ── Botón-ícono redondo del chrome (UN solo componente) ────────────────────────────
+   TODOS son iguales: mismo tamaño, mismo fill TRANSLÚCIDO (alpha < 1 + blur, vidrio
+   esmerilado), SIN outline. Las reglas por-clase de más abajo SOLO aportan lo único:
+   posición de los flotantes y el tamaño del glifo del cog (⚙ rinde más chico que ✕). */
+.view-close,
+.cogbtn,
+.expbtn,
+.chat-fab,
+.minimize-fab,
+.newnote-btn,
+.note-close-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  position: relative; /* ancla del tooltip de hover (::after de [data-tip]) */
+  width: var(--btn);
+  height: var(--btn);
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--fg-soft);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease,
+    transform 0.06s ease;
+}
+.view-close:hover,
+.cogbtn:hover,
+.expbtn:hover,
+.chat-fab:hover,
+.minimize-fab:hover,
+.newnote-btn:hover,
+.note-close-head:hover {
+  background: color-mix(in srgb, var(--hover) 72%, transparent);
+  color: var(--fg);
+}
+.view-close:active,
+.cogbtn:active,
+.expbtn:active,
+.chat-fab:active,
+.minimize-fab:active,
+.newnote-btn:active,
+.note-close-head:active {
+  transform: scale(0.95);
+}
+
+/* ── Tooltips de hover (hint de lo que hace cada botón, incluido el orbe) ─────────────
+   Cualquier control con [data-tip="..."] muestra una etiqueta flotante al pasar el mouse
+   (o al recibir foco de teclado). SOLO con mouse real (@media hover:hover): en touch no hay
+   hover y la etiqueta taparía la UI. Aparece con un pequeño delay para no molestar al pasar
+   de largo. La burbuja es theme-independent (oscura, texto blanco) para leerse sobre el
+   fondo en cualquier tema. El host necesita position!=static (los botones del chrome, el orbe, etc. ya lo
+   tienen; ver reglas .nav-btn / .composer-icon / .composer-send). data-tip-pos cambia el lado
+   (top/left/right) para los botones de los bordes, así la etiqueta no se escapa de pantalla. */
+@media (hover: hover) {
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    /* default: debajo, centrado */
+    top: calc(100% + 0.5rem);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    z-index: 50;
+    padding: 0.32rem 0.56rem;
+    border-radius: 0.5rem;
+    background: rgba(20, 20, 22, 0.92);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+    pointer-events: none;
+    opacity: 0;
+    transition:
+      opacity 0.14s ease,
+      transform 0.14s ease;
+    transition-delay: 0.38s; /* hint, no estorbo: aparece recién si te quedás */
+  }
+  [data-tip]:hover::after,
+  [data-tip]:focus-visible::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  /* Arriba (botones del borde inferior: chat-fab, cog, composer). */
+  [data-tip-pos="top"]::after {
+    top: auto;
+    bottom: calc(100% + 0.5rem);
+    transform: translateX(-50%) translateY(-4px);
+  }
+  [data-tip-pos="top"]:hover::after,
+  [data-tip-pos="top"]:focus-visible::after {
+    transform: translateX(-50%) translateY(0);
+  }
+  /* A la izquierda (botones del borde derecho: newnote, chat-fab, cerrar). */
+  [data-tip-pos="left"]::after {
+    top: 50%;
+    left: auto;
+    right: calc(100% + 0.5rem);
+    transform: translateY(-50%) translateX(4px);
+  }
+  [data-tip-pos="left"]:hover::after,
+  [data-tip-pos="left"]:focus-visible::after {
+    transform: translateY(-50%) translateX(0);
+  }
+  /* A la derecha (botones del borde izquierdo: explorar). */
+  [data-tip-pos="right"]::after {
+    top: 50%;
+    left: calc(100% + 0.5rem);
+    transform: translateY(-50%) translateX(-4px);
+  }
+  [data-tip-pos="right"]:hover::after,
+  [data-tip-pos="right"]:focus-visible::after {
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* ── Tira de pestañas (la "sección de arriba") ──────────────────────────────────────
+   La barra de la nota cuando hay tabs: la tira a la izquierda (crece), el orbe-mini fijo a
+   la derecha. Las tabs se alinean al borde inferior para "fundirse" con el cuerpo. */
+.view-head-tabs {
+  /* SIN header: la tira de pestañas sale del BORDE SUPERIOR de la página (solo respetamos el
+     safe-area del notch). Antes reservábamos una franja de alto --header-h con los tabs pegados
+     ABAJO (align-items:flex-end), lo que dejaba un hueco translúcido ARRIBA de las solapas (el
+     "header" que se veía al revés / offset). Ahora la fila de tabs determina su propio alto y va
+     pegada al top; el cuerpo de la nota fluye por DEBAJO de ella hasta el borde. El mini-orbe va
+     centrado (absoluto, ver .orbfab) sobre esta fila. Con una nota abierta el "+" de nota nueva
+     vive INLINE al final de la tira; a la izquierda reservamos el lugar del explorador sólo cuando
+     está cerrado (regla de abajo). Es OVERLAY (absolute) sobre el cuerpo: así el cuerpo de la
+     nota (.view-body, opaco) llega hasta el BORDE SUPERIOR sin dejar franja, y las solapas
+     cuelgan del top por encima. `position:absolute` ancla además el orbe-mini centrado. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* z-index alto: la tira flota POR ENCIMA del cuerpo opaco (.view-body llega al top). */
+  z-index: 6;
+  padding: env(safe-area-inset-top) 0.85rem 0 0.85rem;
+  /* Las solapas cuelgan del borde SUPERIOR (flex-start), no pegadas abajo. */
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+/* Con el explorador cerrado, el .expbtn flota arriba-izquierda → corremos la tira para que
+   las pestañas no queden debajo de ese botón. */
+.app:not(.app-explorer) .view-head-tabs {
+  padding-left: calc(0.85rem + var(--btn) + 0.5rem);
+}
+.tabstrip {
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none; /* la tira scrollea sin barra visible */
+  -ms-overflow-style: none;
+}
+.tabstrip::-webkit-scrollbar {
+  display: none;
+}
+/* Una pestaña: título + ✕. `flex: 0 1 auto` = ancho de su contenido, pero ENCOGE cuando no
+   entran todas; al achicarse, el label se trunca y termina dejando SOLO la ✕ (min-width).
+   Las INACTIVAS van levemente hundidas (un velo de tinta sobre la nota) para distinguirse de
+   la activa, que se pinta con la MISMA superficie opaca que la nota → se funden. */
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 0 1 auto;
+  min-width: 2.7rem; /* piso ≈ la ✕ (más grande) + padding → "si no entra, solo la cruz" */
+  max-width: 13rem;
+  padding: 0.5rem 0.5rem 0.5rem 0.8rem;
+  border-radius: 0 0 var(--r-md) var(--r-md); /* solapas que CUELGAN del top: redondean abajo */
+  font-size: 0.92rem;
+  color: var(--fg-soft);
+  /* Arrastrable para reordenar (drag&drop nativo): el cursor de "agarre" lo señala. */
+  cursor: grab;
+  /* Inactiva: OPACA para que el scroll de la nota no se cuele por detrás. Se distingue de la
+     activa (ember, --active) por el tinte neutro y de la barra (.view, 80% panel) por ser 100%. */
+  background: var(--panel);
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+/* Mientras se arrastra una pestaña: se atenúa (su "hueco") y el cursor pasa a grabbing. La
+   tira se reordena en vivo bajo el cursor (ver TabStrip), así que esto sólo marca el origen. */
+.tab-dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+.tab:hover {
+  background: color-mix(in srgb, var(--panel) 92%, var(--fg) 8%);
+  color: var(--fg);
+}
+/* La activa NO colapsa (conserva su título) y se pinta con la MISMA mezcla que el cuerpo de la
+   nota (.view-body, var(--panel) 88%) → efectivo ~95%, igual que la nota: la pestaña activa se
+   ve unida a la nota activa, como una sola superficie. */
+.tab-active,
+.tab-active:hover {
+  flex-shrink: 0;
+  max-width: 16rem;
+  /* Tab activa CLARAMENTE resaltada (antes se fundía con el cuerpo y no se entendía en qué nota
+     estabas): mismo tinte ember que el archivo abierto en el árbol (--active) + texto en negrita.
+     Alcanza con el fondo; sin barra de acento. */
+  background: var(--active);
+  color: var(--fg);
+  font-weight: 600;
+}
+.tab-label {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+.tab-close {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.6;
+  transition:
+    background 0.12s ease,
+    opacity 0.12s ease;
+}
+.tab-close:hover {
+  background: color-mix(in srgb, var(--hover) 70%, transparent);
+  opacity: 1;
+}
+/* "+" nota nueva INLINE al final de la tira (estilo "nueva pestaña" del navegador). Con las
+   solapas colgando del top, el "+" va CENTRADO verticalmente en la franja (como el "+" de
+   pestaña nueva de un browser): `align-self:center` lo centra en el alto de la tira sin dejar
+   el hueco de abajo que tenía cuando colgaba del top. `position:relative` ancla su tooltip. */
+.tab-new {
+  flex: none;
+  align-self: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: none;
+  border-radius: 0.45rem;
+  background: none;
+  /* El "+" va SIEMPRE blanco (no gris): es la acción primaria de la tira. El hover
+     sólo agrega el fondo, no cambia el color (antes pasaba de --fg-soft a --fg). */
+  color: var(--fg);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+.tab-new:hover {
+  background: color-mix(in srgb, var(--hover) 60%, transparent);
+}
+/* Botón home en la tira de pestañas: va AL INICIO, siempre visible cuando hay tabs.
+   Mismo alto visual que las pestañas (align-self:flex-end, margin-bottom para bajar a la
+   línea base). Activo (sin tab seleccionada = estamos en home) → mismo fondo que .tab-active
+   para que visualmente "cuente" como la pestaña seleccionada. */
+.tab-home {
+  flex: none;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  margin-bottom: 0.1rem; /* alineado con la base de las pestañas */
+  border: none;
+  border-radius: 0 0 var(--r-md) var(--r-md); /* igual que .tab: cuelga del top */
+  background: color-mix(in srgb, var(--panel) 50%, transparent);
+  color: var(--fg-soft);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+.tab-home:hover {
+  background: color-mix(in srgb, var(--panel) 64%, transparent);
+  color: var(--fg);
+}
+/* Botón home flotante (home mode): todas las tabs están ocultas, sólo queda este botón.
+   Se presenta como una píldora circular — sin las esquinas planas de tab — sobre el fondo
+   translúcido del orb. Se alinea verticalmente centrado dentro de la barra (no pegado abajo
+   como las tabs), lo que lo hace leer como un botón independiente, no como una pestaña vacía. */
+.tab-home-floating {
+  align-self: center;
+  margin-bottom: 0;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--panel) 72%, transparent);
+  color: var(--fg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+.tab-home-floating:hover {
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.24);
+}
+
+/* Mini-orb push-to-talk: CENTRADO horizontalmente en la barra de la nota (absoluto sobre
+   .view-head-tabs, que es position:relative). Vertical: centrado en la franja del header.
+   El orbe es 10% más chico que los botones (var(--btn) * 0.9). Fondo transparente. */
+.orbfab {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 6;
+  width: calc(var(--btn) * 0.9);
+  height: calc(var(--btn) * 0.9);
+  border: none;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  touch-action: none; /* push-to-talk: sin gestos del browser */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: transform 0.25s ease;
+}
+.orbfab.is-thinking {
+  transform: translate(-50%, -50%) scale(0.82);
+}
+/* Flechas back/forward (estilo Obsidian): NO van en el header ni en una banda. Flotan en el
+   MARGEN izquierdo del cuerpo (zona que el texto, centrado a max-width, nunca ocupa), justo
+   debajo de la barra. position:absolute sobre .view (fixed) → quedan fijas al scrollear. Sólo
+   se montan si la pestaña tiene historial (lo decide App). */
+.view-nav {
+  position: absolute;
+  /* ARRIBA a la IZQUIERDA, en el margen del cuerpo (zona que el texto, centrado a max-width, nunca
+     ocupa). Bajada por debajo de la banda del header (safe-area + --header-h) para NO chocar con el
+     toggle del explorador (.expbtn, arriba-izq) cuando el explorer está cerrado y la nota llega
+     hasta el borde. (Antes flotaba al medio vertical — pedido del owner: que vuelva arriba.) */
+  top: calc(env(safe-area-inset-top) + var(--header-h) + 0.4rem);
+  left: 0.6rem;
+  z-index: 6;
+  display: flex;
+  gap: 0.1rem;
+}
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* ancla del tooltip de hover */
+  width: 1.9rem;
+  height: 1.9rem;
+  border: none;
+  border-radius: 0.45rem;
+  background: none;
+  color: var(--fg-soft);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+.nav-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--hover) 60%, transparent);
+  color: var(--fg);
+}
+.nav-btn:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+
+/* Editor: Atomic Editor (live preview) sobre CodeMirror + estado de autosave.
+ * Atomic trae defaults para tema OSCURO; los overrideamos a la paleta ceibo (light).
+ * Los `--atomic-editor-*` los lee el theme del package vía CSS vars con fallback. */
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  /* Texto y acentos */
+  --atomic-editor-fg: var(--fg);
+  --atomic-editor-fg-muted: var(--fg-soft);
+  --atomic-editor-fg-faint: #94a07a; /* sintaxis cruda (`#`, `**`, etc.): suave pero legible */
+  --atomic-editor-accent: var(--accent);
+  --atomic-editor-accent-bright: var(--accent-deep);
+  --atomic-editor-accent-soft: color-mix(in srgb, var(--accent) 30%, transparent);
+  /* Fondos / bordes */
+  --atomic-editor-bg: transparent;
+  --atomic-editor-bg-panel: var(--panel);
+  --atomic-editor-bg-surface: var(--surface);
+  --atomic-editor-border: var(--line-panel);
+  --atomic-editor-code-bg: var(--code-bg);
+  /* Links */
+  --atomic-editor-link: var(--accent-deep);
+  --atomic-editor-link-hover: var(--accent);
+  /* Selección / búsqueda. `--atomic-editor-selection-bg` vive en :root (lo lee el
+     ::selection global del theme); acá NO lo redefinimos para no descalzar editor vs resto. */
+  --atomic-editor-search-bg: #fff3a3;
+  --atomic-editor-search-bg-active: #ffd24a;
+  /* Syntax highlighting de code fences (paleta clara estilo GitHub light) */
+  --atomic-editor-hl-keyword: #cf222e;
+  --atomic-editor-hl-string: #0a3069;
+  --atomic-editor-hl-number: #0550ae;
+  --atomic-editor-hl-function: #8250df;
+  --atomic-editor-hl-variable: #1f2328;
+  --atomic-editor-hl-type: #953800;
+  --atomic-editor-hl-operator: #cf222e;
+  --atomic-editor-hl-property: #1f2328;
+  --atomic-editor-hl-tag: #116329;
+  --atomic-editor-hl-comment: #6e7781;
+  --atomic-editor-hl-escape: #6e7781;
+  --atomic-editor-hl-invalid: #cf222e;
+  --atomic-editor-hl-regexp: #0a3069;
+  /* Tipografía */
+  --atomic-editor-font: var(--font-body);
+  /* Texto del editor (contenido principal). Backlog: 25% más chico que el 1.55rem previo
+     (1.55 × 0.75 ≈ 1.16rem) — sigue +10% sobre el 1.05rem original, más sobrio. */
+  --atomic-editor-body-size: 1.16rem;
+  /* Ancho de la columna de texto del cuerpo (backlog: "márgenes más chicos, cuerpo más
+     ancho"). El package topea `.cm-content` en `var(--atomic-editor-measure, 70ch)` y lo
+     centra; a 1.16rem, 70ch ≈ 44rem quedaba MÁS FINO que el título (56rem). Lo igualamos
+     al título (.editor-title / .cm-editor = 56rem) para que cuerpo y título compartan ancho. */
+  --atomic-editor-measure: 56rem;
+}
+/* El theme del atomic editor define sus vars en `[data-theme=...] .atomic-cm-editor` y en
+   `.atomic-cm-editor` (default) — selectores MÁS cercanos/específicos que nuestro `.editor`,
+   así que pisaban nuestros overrides y dejaban VIOLETA (links, accent, chips de código,
+   selección, blockquote). Los re-mapeamos a ember/neutro con mayor especificidad, cubriendo
+   auto (sin data-theme), light y dark. NUNCA hay violeta en el sitio. */
+html .atomic-cm-editor,
+html[data-theme] .atomic-cm-editor {
+  --atomic-editor-accent: var(--accent);
+  --atomic-editor-accent-bright: var(--accent-deep);
+  --atomic-editor-accent-soft: color-mix(in srgb, var(--accent) 30%, transparent);
+  --atomic-editor-link: var(--accent-deep);
+  --atomic-editor-link-hover: var(--accent);
+  --atomic-editor-code-bg: var(--code-bg);
+  --atomic-editor-selection-bg: color-mix(in srgb, var(--accent) 22%, transparent);
+  --atomic-editor-initial-reveal-bg: color-mix(in srgb, var(--accent) 16%, transparent);
+  --atomic-editor-initial-reveal-bg-strong: color-mix(in srgb, var(--accent) 30%, transparent);
+  --atomic-editor-hl-function: var(--accent-deep);
+}
+/* Título de la nota (#10): input que se ve como un H1 grande, arriba del cuerpo. Es el
+   nombre del archivo; editarlo renombra. Mismo ancho/centrado que el cuerpo del editor. */
+/* Fila del header del editor: emoji (estilo Notion) + título editable. Mantiene el mismo ancho
+   y centrado que tenía el título solo (max 56rem, centrado), con el emoji a su izquierda. */
+/* Sub-header del contenido: fila ANTES del título, con el MISMO ancho/centrado que el cuerpo y el
+   título (56rem, centrado), así sus acciones caen dentro del margen de la página. Contenido
+   right-aligned (a la derecha de la columna de texto). Hoy alberga el botón de blame ("Autoría"). */
+.editor-subheader {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 56rem;
+  width: 100%;
+  margin: 0 auto -0.1rem; /* pega al título de abajo (su margen inferior separa del cuerpo) */
+  /* El título tiene padding-left 1.6rem (gutter) y SIN padding-right: su borde derecho cae en el
+     límite de 56rem. Espejamos eso acá (left 1.6rem, right 0) para que el botón quede right-aligned
+     EXACTO contra el borde derecho del título y del cuerpo. */
+  padding: 0 0 0 1.6rem;
+}
+/* Botón "Autoría" (toggle de blame por línea). Pill discreta: icono + label; estado prendido
+   pinta el accent para que se vea activo desde la nota. */
+.editor-blame-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  position: relative; /* ancla del tooltip de hover (data-tip) */
+  height: 1.8rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--line-panel);
+  border-radius: 0.5rem;
+  background: none;
+  color: var(--fg-soft);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease,
+    border-color 0.12s ease;
+}
+.editor-blame-btn:hover {
+  background: color-mix(in srgb, var(--hover) 60%, transparent);
+  color: var(--fg);
+}
+.editor-blame-btn.is-on {
+  color: var(--accent-deep);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line-panel));
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.editor-title-row {
+  position: relative; /* ancla el botón de emoji en el gutter izquierdo, sin mover el título */
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 56rem;
+  width: 100%;
+  margin: 0 auto 0.9rem;
+  /* el padding-left lo aporta el .editor-title (1.6rem); el botón de emoji vive en ese gutter. */
+}
+.editor-title-row .editor-title {
+  margin: 0; /* el margen/centrado ya lo da la fila */
+}
+/* Botón de emoji: una "hendidura" sutil, casi imperceptible, en el gutter a la IZQUIERDA del
+   título (estilo Notion). Posicionado absoluto → no desalinea el título respecto del cuerpo. */
+.editor-title-emoji-btn {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.3rem;
+  background: none;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.editor-title-emoji-btn.has-emoji {
+  font-size: 1.55rem;
+  line-height: 1;
+}
+/* Con emoji puesto, corremos el título un toque para que no quede pegado al emoji. */
+.editor-title-emoji-btn.has-emoji + .editor-title {
+  padding-left: 2rem;
+}
+.editor-title-emoji-btn:hover {
+  background: color-mix(in srgb, var(--hover) 45%, transparent);
+}
+/* Estado vacío: una ranura mínima (la "hendidura"), apenas visible; se insinúa en hover. */
+.editor-title-emoji-slot {
+  width: 0.8rem;
+  height: 0.26rem;
+  border-radius: 0.18rem;
+  background: var(--fg);
+  opacity: 0.07;
+  transition: opacity 0.12s ease;
+}
+.editor-title-emoji-btn:hover .editor-title-emoji-slot {
+  opacity: 0.4;
+}
+.editor-title {
+  display: block;
+  max-width: 56rem;
+  width: 100%;
+  margin: 0 auto 0.9rem;
+  /* Sin caja (#10 backlog): el título se lee como texto normal, sin fondo ni borde. */
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  font-weight: 500; /* P1-6: voz editorial/serena — más liviano que 600, igual legibilidad */
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  /* padding-left == ancho del fold-gutter del cuerpo (.cm-foldGutter, 1.6rem) para alinear
+     el borde izquierdo del título con el del cuerpo, que el gutter corre a la derecha. */
+  padding: 0 0 0 1.6rem;
+}
+.editor-title:focus {
+  outline: none;
+}
+.editor-title::placeholder {
+  color: var(--fg-soft);
+}
+/* P2-11: tinte oliva botánico en blockquotes del editor (igual que chat bubble).
+   El atomic editor renderiza blockquotes como `.cm-line` envueltas en un widget de fondo —
+   sobreescribimos el borde-izq heredado del package y sumamos el fondo sutil. */
+.editor .cm-editor blockquote,
+.editor .cm-blockquote {
+  border-left-color: rgba(44, 62, 10, 0.45);
+  background: rgba(44, 62, 10, 0.05);
+  border-radius: 0 2px 2px 0;
+  padding: 0.1rem 0.4rem;
+}
+/* Link renderizado: clickeable en TODO su largo (ver linkClick.ts) → cursor de mano + subrayado
+   para que se lea como link. El color ya es ember (override de arriba). */
+.editor .cm-atomic-link {
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.editor .cm-editor {
+  max-width: 56rem;
+  margin: 0 auto;
+  width: 100%;
+  background: transparent;
+}
+.editor .cm-editor.cm-focused {
+  outline: none;
+}
+/* `.cm-editor` en el selector sube la especificidad (0,3,0) para ganarle al theme de atomic,
+   que inyecta `.cm-gutters { display:none }` (no usa gutter propio). Lo reactivamos para el
+   fold-gutter de títulos. */
+.editor .cm-editor .cm-gutters {
+  display: flex;
+  background: transparent;
+  border: none;
+}
+/* El fold-gutter (chevrons de títulos colapsables) reserva una columna fija al inicio del
+   cuerpo (1.6rem ABSOLUTO, no em — el cuerpo y el título tienen font-size distinto). El
+   título compensa con el mismo padding-left (ver .editor-title) para que cuerpo y título
+   compartan el borde izquierdo, como en Obsidian. NO usamos negative-margin: el gutter de
+   CM6 es position:sticky e ignora el margen, quedaba solapado sobre el texto. */
+.editor .cm-foldGutter {
+  width: 1.6rem;
+}
+/* Chevron `›`: rota a apuntar abajo cuando la sección está abierta, derecha cuando colapsada
+   (= screenshot Obsidian). Tenue por default, ember al hover; siempre visible si está
+   colapsada para señalar que hay contenido oculto. */
+.editor .cm-foldGutter .cm-gutterElement {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--fg-soft);
+}
+.editor .cm-fold-chevron {
+  display: inline-block;
+  font-size: 1.1em;
+  line-height: 1;
+  opacity: 0.32;
+  transform: rotate(90deg);
+  transition:
+    transform 0.12s ease,
+    opacity 0.12s ease,
+    color 0.12s ease;
+}
+.editor .cm-fold-chevron-closed {
+  transform: rotate(0deg);
+  opacity: 0.85;
+  color: var(--accent);
+}
+.editor .cm-foldGutter .cm-gutterElement:hover .cm-fold-chevron {
+  opacity: 1;
+  color: var(--accent);
+}
+/* Placeholder "…" del fold: inline tras el título colapsado, en ember tenue. */
+.editor .cm-foldPlaceholder {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  margin: 0 0.4em;
+  padding: 0;
+  opacity: 0.7;
+  cursor: pointer;
+}
+/* Checkboxes de tareas (`- [ ]` / `- [x]`): el widget nativo del package salía chico,
+   descentrado y violeta. Lo reemplazamos por una caja custom (`appearance: none`) con
+   control total: borde ember fino, esquinas sutiles, y al marcar relleno ember + check
+   blanco. CLAVE: `font-size: inherit` — sin esto el `em` resolvía contra el font-size
+   propio del <input> (~16px), no el de la línea (24.8px), así que la caja salía chica Y
+   su footprint de 1.2em no llenaba el alcove (text-indent -1.2em) → desalineada. Con
+   inherit, 1.2em (width+margin) == el alcove de la línea, y todo escala con el texto.
+   Tamaño 1.0em (= el texto): 1.05em se veía un toque grande. margin 0.2em mantiene el
+   footprint en 1.2em (= alcove), así el texto de la 1ª línea cae en la misma columna que
+   las líneas de continuación (que listHang.ts cuelga ahí). vertical-align -0.16em centra
+   la caja con el texto (medido: Δ≈0). */
+.editor .cm-atomic-task-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  font-size: inherit;
+  /* El caret de una tarea VACÍA cae en el borde derecho del border-box del checkbox (CodeMirror
+     mide el caret con coordsAtPos, que usa el border-box del widget e IGNORA el margin → subir el
+     margin movía el texto pero no el caret, que quedaba pegado al cuadro). Solución: el elemento
+     mide 1.2em (= el "alcove" fijo del editor) con margin 0, y el cuadro se dibuja sólo en el 1em
+     IZQUIERDO vía mask, dejando 0.2em transparentes a la derecha. Así el border-box termina en
+     1.2em → el caret cae ahí, 0.2em despegado del cuadro y a la misma altura que el texto. El
+     footprint sigue siendo 1.2em (margin 0 + width 1.2em) → la alineación con las líneas
+     envueltas no cambia. mask + background-color conservan el color del tema (--fg-soft). */
+  width: 1.2em;
+  height: 1em;
+  margin: 0;
+  vertical-align: -0.16em;
+  border: none;
+  background-color: var(--fg-soft);
+  -webkit-mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='1.3' y='1.3' width='21.4' height='21.4' rx='5' fill='none' stroke='%23000' stroke-width='2.6'/%3E%3C/svg%3E")
+    left center / 1em 1em no-repeat;
+  mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='1.3' y='1.3' width='21.4' height='21.4' rx='5' fill='none' stroke='%23000' stroke-width='2.6'/%3E%3C/svg%3E")
+    left center / 1em 1em no-repeat;
+  cursor: pointer;
+}
+/* Marcado: cuadro lleno (mask sólido) + check blanco encima, confinado al 1em izquierdo. El
+   color del relleno sale de background-color (--fg-soft, themed); el check es blanco. */
+.editor .cm-atomic-task-checkbox:checked {
+  background-color: var(--fg-soft);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M5 12.5l4.2 4.2L19 7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 0.09em center;
+  background-size: 0.82em;
+  -webkit-mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='1.3' y='1.3' width='21.4' height='21.4' rx='5' fill='%23000'/%3E%3C/svg%3E")
+    left center / 1em 1em no-repeat;
+  mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='1.3' y='1.3' width='21.4' height='21.4' rx='5' fill='%23000'/%3E%3C/svg%3E")
+    left center / 1em 1em no-repeat;
+}
+/* Tachado de tareas done: el package lo pone como `text-decoration: line-through` en TODA
+   la `.cm-line`, así que cruza los spans de indentación (whitespace) a la izquierda del
+   checkbox → en items anidados la línea se va para la izquierda. Lo sacamos de la línea y
+   lo aplicamos SOLO al texto: los span(s) que SIGUEN al checkbox (la indentación va antes;
+   el <input>, replaced, nunca se tacha). Conservamos el color faint que el package ya da. */
+.editor .cm-line.cm-atomic-task-done {
+  text-decoration: none;
+}
+.editor .cm-line.cm-atomic-task-done .cm-atomic-task-checkbox ~ span {
+  text-decoration: line-through;
+}
+/* Caret despegado del marcador en bullets (`- `/`* `/`+ `) y listas ordenadas (`1. `) — MISMO
+   problema que el checkbox de arriba, misma técnica. El bullet (widget `•`) y el número ordenado
+   (su texto `1.`) comparten el "alcove" `.cm-atomic-list-marker` del package: inline-block de
+   width 0.9em + margin-right 0.3em (footprint 1.2em = ALCOVE_EM) con el glifo `text-align: right`
+   pegado al borde derecho del content-box (≈0.9em). En un item VACÍO el caret cae en el borde
+   derecho del BORDER-box (CodeMirror lo mide con coordsAtPos, que usa el border-box e IGNORA el
+   margin → el margin-right 0.3em corre el texto pero NO el caret, que queda pegadito al marcador
+   a 0.9em). Fix análogo al checkbox: pasamos 0.2em del margin a padding-right CON content-box (el
+   reset global `* { box-sizing: border-box }` lo pisaría, por eso lo forzamos) → el border-box
+   termina en 1.1em y el caret cae ahí, 0.2em despegado del marcador. El glifo sigue en 0.9em
+   (text-align mide sobre el content-box, no incluye el padding) y el footprint se mantiene en
+   1.2em (0.9 width + 0.2 padding + 0.1 margin) → la alineación de las líneas envueltas (listHang +
+   la del propio atomic) NO cambia. Excluimos el checkbox: ya tiene su override completo (width
+   1.2em, margin 0) y su caret ya está resuelto. */
+.editor .cm-atomic-list-marker:not(.cm-atomic-task-checkbox) {
+  box-sizing: content-box;
+  width: 0.9em;
+  padding-right: 0.2em;
+  margin-right: 0.1em;
+}
+.editor-status {
+  max-width: 56rem;
+  margin: 0 auto;
+  width: 100%;
+  min-height: 1.1em;
+  font-size: 0.78rem;
+  color: var(--fg-soft);
+}
+.editor-status[data-state="saved"] {
+  color: #2f7d32;
+}
+.editor-status[data-state="conflict"],
+.editor-status[data-state="error"] {
+  color: var(--danger);
+}
+/* Panel de conflicto REAL (Fase B): el rebase del 409 encontró solapamiento de líneas.
+   Mismo lenguaje visual que .editor-recovered/.editor-external pero en rojo: mensaje +
+   botones de resolución ("conservar lo mío" / "traer lo de afuera" / diff). */
+.editor-conflict {
+  max-width: 56rem;
+  margin: 0 auto;
+  width: 100%;
+  background: color-mix(in srgb, var(--danger) 12%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--danger) 40%, var(--line-panel));
+  color: var(--danger);
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--r-sm);
+  font-size: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+}
+.editor-conflict-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.editor-conflict button {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--line-panel));
+  color: inherit;
+  border-radius: 6px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.editor-conflict button:hover {
+  background: color-mix(in srgb, var(--danger) 18%, var(--panel));
+}
+/* Diff mío↔de-ellos dentro del panel: − líneas mías, + líneas de afuera, contexto en
+   neutro y corridas largas iguales colapsadas ("⋯ N líneas"). */
+.editor-conflict-diff {
+  flex-basis: 100%;
+  margin: 0.25rem 0 0;
+  max-height: 14rem;
+  overflow: auto;
+  background: var(--panel);
+  border: 1px solid var(--line-panel);
+  border-radius: 6px;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--fg);
+}
+.editor-conflict-diff .diff-mine {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+}
+.editor-conflict-diff .diff-theirs {
+  background: color-mix(in srgb, #2f7d32 14%, transparent);
+}
+.editor-conflict-diff .diff-skip {
+  opacity: 0.55;
+  font-style: italic;
+}
+/* Aviso suave (no modal) de draft recuperado: "recuperé lo que estabas escribiendo".
+   Ámbar informativo (no es un error): el texto YA está en el editor; los botones permiten
+   seguir (descarta el aviso) o descartar el draft y volver a la versión guardada. */
+.editor-recovered {
+  max-width: 56rem;
+  margin: 0 auto;
+  width: 100%;
+  background: color-mix(in srgb, #b8860b 12%, var(--panel));
+  border: 1px solid color-mix(in srgb, #b8860b 40%, var(--line-panel));
+  color: color-mix(in srgb, #b8860b 75%, var(--fg));
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--r-sm);
+  font-size: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+}
+.editor-recovered-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.editor-recovered button {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, #b8860b 45%, var(--line-panel));
+  color: inherit;
+  border-radius: 6px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.editor-recovered button:hover {
+  background: color-mix(in srgb, #b8860b 18%, var(--panel));
+}
+/* Banner no-modal de cambio externo DIFERIDO (Fase C): "hay una versión más nueva".
+   Aparece solo cuando el cambio de afuera llegó con tipeo sin guardar (con buffer limpio
+   el cambio entra solo, como transacción). Azul informativo (no es error ni pérdida):
+   el texto del usuario sigue intacto; los botones traen lo nuevo (con confirmación) o
+   lo postergan. Misma anatomía que .editor-recovered. */
+.editor-external {
+  max-width: 56rem;
+  margin: 0 auto;
+  width: 100%;
+  background: color-mix(in srgb, #3f87d6 12%, var(--panel));
+  border: 1px solid color-mix(in srgb, #3f87d6 40%, var(--line-panel));
+  color: color-mix(in srgb, #3f87d6 75%, var(--fg));
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--r-sm);
+  font-size: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+}
+.editor-external-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.editor-external button {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, #3f87d6 45%, var(--line-panel));
+  color: inherit;
+  border-radius: 6px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.editor-external button:hover {
+  background: color-mix(in srgb, #3f87d6 18%, var(--panel));
+}
+/* Botones mobile de mover item de lista (↑/↓): solo aparecen en dispositivos táctiles
+   (pointer:coarse). El JS los muestra/oculta con display:none/flex; este bloque define
+   el layout y el estilo. En desktop (pointer:fine) el JS no los muestra nunca. */
+@media (pointer: coarse) {
+  .cm-list-move-btns {
+    /* position:absolute dentro del .cm-editor (que tiene position:relative) */
+    position: absolute;
+    right: 0.25rem;
+    top: 0;
+    /* display:none/flex lo controla el JS; flex-direction define cómo se acomodan */
+    flex-direction: row;
+    gap: 0.25rem;
+    z-index: 10;
+    pointer-events: auto;
+    /* Centrar verticalmente sobre la línea activa */
+    transform: translateY(-50%);
+  }
+  .cm-list-move-btn {
+    /* Target táctil mínimo de 44px × 44px (recomendación WCAG) */
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--panel) 90%, transparent);
+    border: 1px solid var(--line-panel);
+    border-radius: var(--r-sm);
+    color: var(--fg);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    /* Sin outline al toque (el tabindex=-1 ya lo excluye del teclado) */
+    outline: none;
+    /* Feedback visual al tap */
+    transition:
+      background 0.1s ease,
+      opacity 0.1s ease;
+    -webkit-tap-highlight-color: transparent;
+    /* Evitar selección accidental de texto al long-press */
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .cm-list-move-btn:active {
+    background: color-mix(in srgb, var(--accent) 20%, var(--panel));
+  }
+  .cm-list-move-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  /* Touch targets mínimos 44px (P1-7 — WCAG 2.5.8 / Apple HIG). El "+" del explorer y la ✕
+     de tab son acciones frecuentes en mobile; sin esto quedan en ~26px y ~27px. */
+  .exp-add {
+    width: 2.5rem; /* 40px ≥ 44px con el padding de la fila; safe en el contexto de .exp-row */
+  }
+  .tab-close {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+  .composer-icon,
+  .composer-send {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  .exp-members-btn {
+    padding: 0.4rem 0.2rem; /* amplía hit area sin cambiar la visual de los chips */
+  }
+}
+
+.view-body {
+  flex: 1;
+  overflow: auto;
+  /* El overscroll del cuerpo de la nota NO encadena al documento: así un scroll agresivo
+     (momentum/rubber-band de iOS) no hace rebotar la página ni despega/recorta la barra de
+     pestañas (.view es fixed). Ver html,body { overscroll-behavior:none }. */
+  overscroll-behavior: contain;
+  /* El header de tabs es overlay (absolute) → el cuerpo arranca en el BORDE SUPERIOR. Reservamos
+     arriba el alto de la fila de solapas para que el contenido no quede tapado por ellas, pero la
+     SUPERFICIE opaca llega hasta el top (sin franja). */
+  padding: calc(env(safe-area-inset-top) + 3.4rem) 1.25rem 6rem;
+  /* Capa opaca del cuerpo: ocupa toda la vista (incl. detrás de las solapas) → no hay franja
+     translúcida arriba. La tab activa usa la misma mezcla → se funde con el cuerpo. */
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  /* El cuerpo SUBE 1px bajo la fila de tabs para eliminar la costura tab↔nota. La franja de
+     tabs (.view-head-tabs) pinta ENCIMA por su z-index:1, así que este 1px del cuerpo (misma
+     mezcla 88% que la tab activa) queda tapado por la fila y, en la unión, no asoma el sliver
+     translúcido de la base de .view (80%) que generaba la línea. A diferencia del intento previo
+     (que hacía DESBORDAR la tab activa hacia abajo), esto NO lo clipea nada: el .view-body es
+     hijo directo de .view — no del .tabstrip (overflow-x:auto, que recorta el desborde vertical
+     de la tab) — así que su margin negativo se respeta. Donde no hay tab, el cuerpo asoma 1px
+     (imperceptible: misma superficie que la nota). Ya no hace falta el truco anti-costura: el
+     cuerpo arranca en el top y las solapas flotan encima (overlay). */
+  margin-top: 0;
+}
+/* Con el chat abierto, recentrar la columna legible para que el texto NO quede tapado por el
+   panel del chat (anclado abajo-derecha). El editor se centra con `margin:0 auto` dentro del
+   content-box de `.view-body`; al engordar el padding derecho con el ancho del chat (+ su offset
+   y un respiro), el centro se corre a la IZQUIERDA y la columna queda centrada en el hueco
+   [borde-izq disponible ↔ borde-izq del chat]. El borde-izq lo mueve `.app-explorer .view`
+   (left:var(--exp-w)), así que esto COMPONE con el explorer sin reglas extra: la columna se
+   recentra en el espacio realmente libre en cada combinación. (2.5rem = offset del chat 1.25rem
+   + respiro 1.25rem.) */
+.app-chat .view-body {
+  padding-right: calc(var(--chat-w) + 2.5rem);
+}
+.view-msg {
+  color: var(--fg-soft);
+  text-align: center;
+  margin-top: 3rem;
+}
+/* Vista de BIENVENIDA (README de raíz): el léeme del producto, de solo lectura. Columna angosta y
+   legible, con la voz tipográfica de la marca (font-display en los títulos, ember en los acentos).
+   Entra con un fade+rise suave. Vive en el mismo .view-body que una nota → hereda scroll/padding. */
+.welcome {
+  max-width: 40rem;
+  margin: 0 auto;
+  width: 100%;
+  color: var(--fg);
+  font-size: 1.02rem;
+  line-height: 1.7;
+  animation: welcome-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.welcome > :first-child {
+  margin-top: 0;
+}
+.welcome h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0 0 1.1rem;
+  text-wrap: balance;
+}
+.welcome h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.28rem;
+  letter-spacing: -0.01em;
+  margin: 2.2rem 0 0.6rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--ember) 35%, transparent);
+}
+.welcome h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin: 1.5rem 0 0.5rem;
+}
+.welcome p {
+  margin: 0.7rem 0;
+}
+.welcome ul {
+  margin: 0.7rem 0;
+  padding-left: 1.25rem;
+}
+.welcome li {
+  margin: 0.4rem 0;
+}
+.welcome li::marker {
+  color: var(--ember);
+}
+.welcome strong {
+  font-weight: 600;
+  color: color-mix(in srgb, var(--fg) 70%, var(--ember));
+}
+.welcome em {
+  font-style: italic;
+  color: var(--fg-soft);
+}
+.welcome a {
+  color: var(--accent-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.welcome hr {
+  border: none;
+  border-top: 1px solid var(--line-panel);
+  margin: 2rem 0 1.4rem;
+}
+@keyframes welcome-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .welcome {
+    animation: none;
+  }
+}
+/* (Los íconos ahora son SVG del kit — mismo tamaño en todos los botones; ya no hace falta
+   ajustar el font-size del cog para igualar a la ✕.) */
+/* Configuración como POPUP (mismo tipo que el chat): tarjeta 80% opaca + blur, sin borde.
+   Aparece abajo a la IZQUIERDA, alineada con su launcher (el cog). Header (.chatpanel-head)
+   + cuerpo scrolleable. */
+.settings-popup {
+  position: fixed;
+  left: max(1.25rem, env(safe-area-inset-left));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  z-index: 35;
+  width: min(28rem, calc(100vw - 1.5rem));
+  height: min(40rem, calc(100vh - 2.5rem));
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  border-radius: var(--r-lg);
+  box-shadow: 0 14px 40px -12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  color: var(--fg);
+}
+.settings-popup-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem 0.9rem 1rem;
+}
+.settings-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--fg-soft);
+}
+.settings-row select {
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--line-panel);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--fg);
+}
+.settings-row select:disabled {
+  background: var(--surface-muted);
+  color: var(--fg-soft);
+  cursor: not-allowed;
+}
+/* Valor read-only de la fila de versión (Configuración → Versión): SHA + entorno en monospace,
+   para distinguirlo del label y que el SHA sea legible/seleccionable. */
+.settings-version-value {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--fg);
+  user-select: text;
+}
+
+/* Perfil (edición web): avatar circular + acciones + alias. Va arriba de todo en el cog. */
+.settings-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--line-panel);
+}
+.settings-section-title {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fg-soft);
+}
+/* Sección genérica (Apariencia, Voz y audio, Asistente): mismo look que .settings-profile
+   pero sin avatar — solo title + controles + border-bottom de separación. */
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--line-panel);
+}
+.settings-account {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.settings-account-handle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+.settings-account-email {
+  font-size: 0.82rem;
+  color: var(--fg-soft);
+  word-break: break-all;
+}
+.settings-profile-top {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.settings-avatar {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--surface-muted);
+  border: 1px solid var(--line-panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.settings-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.settings-avatar-ph {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--fg-soft);
+}
+.settings-avatar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.settings-avatar-actions button {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--line-panel);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.settings-avatar-actions button:hover:not(:disabled) {
+  background: var(--hover);
+}
+.settings-avatar-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.settings-avatar-remove {
+  color: var(--danger) !important;
+}
+.settings-alias-input {
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--line-panel);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--fg);
+}
+/* Prompts del fondo (Unsplash): textarea multi-línea, mismo look que el alias. */
+.settings-bg-input {
+  font-family: inherit;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--line-panel);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--fg);
+  resize: vertical;
+  min-height: 3.6rem;
+}
+.settings-profile-save {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+.settings-profile-err {
+  flex: 1;
+  font-size: 0.78rem;
+  color: var(--danger);
+}
+.settings-profile-ok {
+  flex: 1;
+  font-size: 0.78rem;
+  color: var(--success); /* P3-12: token semántico en lugar de hex hardcodeado */
+}
+.settings-profile-save button {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--accent-deep);
+  border-radius: var(--r-sm);
+  background: var(--accent-deep); /* P0-3: ember-deep → WCAG AA */
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+.settings-profile-save button:hover:not(:disabled) {
+  background: var(--accent); /* hover sube a ember claro */
+  border-color: var(--accent);
+}
+.settings-profile-save button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Agenda (panel de crons): reusa la caja .settings-popup; sólo estilamos las filas. */
+.agenda-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--fg-soft);
+}
+.agenda-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.agenda-grouphead {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--fg-soft);
+}
+.agenda-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--line-panel);
+  border-radius: 10px;
+  background: var(--surface);
+}
+/* La parte principal de la fila es un botón (abre el modal de edición). Reseteamos el
+   look de botón y lo dejamos como bloque de texto clickeable, alineado a la izquierda. */
+.agenda-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+/* Texto de una fila de conexiones (no clickeable): columna nombre + detalle. */
+.conn-rowtext {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+}
+.agenda-what {
+  font-size: 0.9rem;
+  color: var(--fg);
+}
+.agenda-when {
+  font-size: 0.78rem;
+  color: var(--fg-soft);
+}
+.agenda-row-main:hover .agenda-what {
+  color: var(--ember);
+}
+.agenda-cancel {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--fg-soft);
+  cursor: pointer;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease;
+}
+.agenda-cancel:hover {
+  background: color-mix(in srgb, var(--ember) 16%, transparent);
+  color: var(--fg);
+}
+
+/* --- Conexiones v2: pestañas + filas clickeables + drill-down ------------- */
+/* Botón "volver" del drill-down, en el header (estilo nav: back · título · cerrar). */
+.conn-back {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--fg-soft);
+  cursor: pointer;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease;
+}
+.conn-back:hover {
+  background: color-mix(in srgb, var(--ember) 16%, transparent);
+  color: var(--fg);
+}
+/* Segmented control Canales | Conexiones. */
+.conn-tabs {
+  flex: none;
+  display: flex;
+  gap: 0.25rem;
+  margin: 0 0.9rem 0.25rem;
+  padding: 0.25rem;
+  border-radius: 10px;
+  background: var(--surface-muted, var(--surface));
+}
+.conn-tab {
+  flex: 1;
+  padding: 0.4rem 0.5rem;
+  border: none;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--fg-soft);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease;
+}
+.conn-tab:hover {
+  color: var(--fg);
+}
+.conn-tab-on {
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: 0 1px 3px -1px rgba(0, 0, 0, 0.25);
+}
+/* Fila clickeable (canal o conexión): punto de estado · texto · chevron. */
+.conn-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--line-panel);
+  border-radius: 10px;
+  background: var(--surface);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: var(--fg-soft);
+  transition:
+    border-color 0.12s ease,
+    color 0.12s ease;
+}
+.conn-row:hover {
+  border-color: color-mix(in srgb, var(--ember) 40%, var(--line-panel));
+}
+.conn-row:hover .agenda-what {
+  color: var(--ember);
+}
+/* Punto de estado: apagado = disponible/no vinculado; encendido = conectado. */
+.conn-dot {
+  flex: none;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--fg-soft);
+  opacity: 0.4;
+}
+.conn-dot-on {
+  background: #34c759;
+  opacity: 1;
+}
+/* Drill-down: detalle read-only de un item. */
+.conn-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.conn-status {
+  align-self: flex-start;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--r-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--fg-soft) 18%, transparent);
+  color: var(--fg-soft);
+}
+.conn-status-on {
+  background: color-mix(in srgb, #34c759 22%, transparent);
+  color: #2a9d4d;
+}
+/* Tri-estado: conectado PERO roto (venció el permiso OAuth → reconectar). Ámbar de warning, distinto
+   del verde (conectado) y del gris (disponible/desconectado). */
+.conn-dot-broken {
+  background: #e8a13a;
+  opacity: 1;
+}
+.conn-status-broken {
+  background: color-mix(in srgb, #e8a13a 24%, transparent);
+  color: #b5751a;
+}
+.conn-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.conn-field-k {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--fg-soft);
+}
+.conn-field-v {
+  font-size: 0.9rem;
+  color: var(--fg);
+  word-break: break-word;
+}
+.conn-acct {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--line-panel);
+}
+.conn-acct:last-child {
+  border-bottom: none;
+}
+.conn-acct-head {
+  font-size: 0.9rem;
+  color: var(--fg);
+  word-break: break-word;
+}
+.conn-acct-profile {
+  font-weight: 600;
+}
+.conn-acct-sep {
+  color: var(--fg-soft);
+}
+.conn-acct-id {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.85rem;
+}
+.conn-acct-unknown {
+  color: var(--fg-soft);
+}
+/* Perfil roto (grant muerto): borde ámbar + badge "reconectar" para que salte a la vista. */
+.conn-acct-broken {
+  border-left: 2px solid #e8a13a;
+  padding-left: 0.5rem;
+}
+.conn-acct-badge {
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--r-pill);
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: color-mix(in srgb, #e8a13a 20%, transparent);
+  color: #b5751a;
+  vertical-align: middle;
+}
+.conn-perms {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.conn-perm {
+  font-size: 0.8rem;
+  color: var(--fg-soft);
+  line-height: 1.4;
+}
+.conn-note {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--fg-soft);
+}
+/* Banner de conexión rota (venció el permiso): fondo ámbar suave, resalta la acción de reconectar. */
+.conn-note-broken {
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, #e8a13a 12%, transparent);
+  color: var(--fg);
+}
+.conn-cmd {
+  align-self: flex-start;
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-panel);
+  background: var(--surface);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.85rem;
+  color: var(--fg);
+  word-break: break-word;
+}
+
+/* ── v2 PR-B: header de página (syspage-head) ─────────────────────────────── */
+/* Mismo gesto tipográfico que una nota (editor-title): font-display, 2.1rem, w500, tracking.
+   La columna ya la da .settings-popup-body (56rem + 1.6rem padding-left). */
+.syspage-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+.syspage-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  line-height: 1.15;
+}
+.syspage-sub {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--fg-soft);
+  line-height: 1.4;
+}
+
+/* ── v2 PR-B: Agenda — timeline por día ─────────────────────────────────── */
+/* Eyebrow de sección (PRÓXIMOS / RITMOS) — igual que .settings-section-title pero
+   con separación superior para distinguir grupos entre sí. */
+.agenda-section-eyebrow {
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+/* Contenedor de timeline (próximos) o ritmos. */
+.agenda-timeline {
+  display: flex;
+  flex-direction: column;
+}
+/* Grupo por día: header + filas. */
+.agenda-day-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-bottom: 0.9rem;
+}
+/* Header de día: eyebrow caps, fg-soft. "HOY" → ember. */
+.agenda-day-header {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fg-soft);
+}
+.agenda-day-today {
+  color: var(--ember);
+}
+/* Fila de timeline: riel │ + hora + título + chip + ✕ */
+.agenda-tl-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0;
+  position: relative;
+}
+/* El riel izquierdo: borde 2px ember 35% */
+.agenda-tl-rail {
+  flex: none;
+  width: 2px;
+  align-self: stretch;
+  min-height: 1.6rem;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--ember) 35%, transparent);
+}
+/* Botón principal de la fila (hora + título): sin estilo de botón, texto izquierda. */
+.agenda-tl-main {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  min-width: 0;
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+/* Hora: font-display w500, tabular-nums. */
+.agenda-tl-time {
+  flex: none;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-soft);
+  letter-spacing: 0.01em;
+}
+/* Título de la fila. */
+.agenda-tl-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9rem;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Hover de fila: título pasa a ember. */
+.agenda-tl-main:hover .agenda-tl-title {
+  color: var(--ember);
+}
+/* Chip de canal: 0.72rem, fg-soft, pill, fondo surface. */
+.agenda-channel-chip {
+  flex: none;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line-panel);
+  font-size: 0.72rem;
+  color: var(--fg-soft);
+  white-space: nowrap;
+}
+/* Fila de ritmos (recurrentes): ↻ badge + botón + chip + ✕ */
+.agenda-recur-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0;
+}
+/* Badge ↻: carácter en fg-soft, tamaño algo mayor que el texto. */
+.agenda-recur-badge {
+  flex: none;
+  font-size: 0.9rem;
+  color: var(--fg-soft);
+  line-height: 1;
+}
+/* Ritmos: separación entre timeline y ritmos. */
+.agenda-timeline-ritmos {
+  margin-top: 0.5rem;
+}
+/* Hint final en em itálica (voz de marca). */
+.agenda-brand-hint {
+  margin: 1.5rem 0 0;
+  font-size: 0.88rem;
+  color: var(--fg-soft);
+  line-height: 1.5;
+}
+.agenda-brand-hint em {
+  font-style: italic;
+}
+/* Empty state de agenda: centrado, em itálica. */
+.agenda-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1.5rem 0;
+}
+.agenda-empty-hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--fg-soft);
+  line-height: 1.55;
+  font-style: italic;
+}
+
+/* ── v2 PR-B: Canales — cards con todo a la vista ───────────────────────── */
+/* Grilla: 3 columnas en desktop (dentro de la columna de 56rem), apiladas en mobile. */
+.channels-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+@media (max-width: 640px) {
+  .channels-cards {
+    grid-template-columns: 1fr;
+  }
+}
+/* Card de canal: --surface, borde --line-panel, radio --r-lg (panel). */
+.channel-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line-panel);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+/* Encabezado de la card: nombre + dot de estado. */
+.channel-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+.channel-card-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+/* Dot de estado: relleno --success (vinculado) / aro hueco fg-soft (no). */
+.channel-card-dot {
+  flex: none;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  border: 2px solid var(--fg-soft);
+  opacity: 0.5;
+}
+.channel-card-dot-on {
+  background: var(--success);
+  border-color: var(--success);
+  opacity: 1;
+}
+/* Label de estado: eyebrow caps. */
+.channel-card-status {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fg-soft);
+}
+.channel-card-status-on {
+  color: var(--success);
+}
+/* Identidades de la card. */
+.channel-card-ids {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.channel-card-id {
+  font-size: 0.85rem;
+  color: var(--fg);
+  word-break: break-word;
+}
+/* Texto howto de la card. */
+.channel-card-howto {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--fg-soft);
+  line-height: 1.45;
+}
+/* Comando /connect inline en la card (más compacto que el conn-cmd full-width). */
+.channel-card-cmd {
+  display: inline;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.78rem;
+}
+
+/* ── v2 PR-B: Conexiones — grupos CONECTADAS/DISPONIBLES ─────────────────── */
+/* Contenedor de grupos. */
+.conn-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+/* Grupo: eyebrow + lista. */
+.conn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+/* Eyebrow de grupo con cuenta en fg-soft al final. */
+.conn-group-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.conn-group-count {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--fg-soft);
+  opacity: 0.7;
+}
+/* Dot de estado en conn-row: tokenizado a --success (P3-12). */
+.conn-dot-on {
+  background: var(--success);
+  opacity: 1;
+}
+/* Eyebrow en el drill-down de ServiceDetail (CUENTA / PERMISOS). */
+.conn-field-eyebrow {
+  margin-top: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+
+/* --- Modal central de edición/detalle de recordatorio --------------------- */
+.cron-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40; /* por encima de los popups de esquina (settings/agenda = 35) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--bg, #000) 55%, transparent);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.cron-modal {
+  width: min(30rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  border-radius: var(--r-lg);
+  box-shadow: 0 18px 48px -12px rgba(0, 0, 0, 0.42);
+  overflow: hidden;
+  color: var(--fg);
+}
+.cron-modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.75rem 1rem 1rem;
+}
+.cron-modal-title {
+  width: 100%;
+  font: inherit;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--fg);
+  background: var(--surface);
+  border: 1px solid var(--line-panel);
+  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+}
+.cron-modal-title:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--ember) 55%, var(--line-panel));
+}
+.cron-modal-text {
+  width: 100%;
+  resize: vertical;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--surface);
+  border: 1px solid var(--line-panel);
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+}
+.cron-modal-text:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--ember) 55%, var(--line-panel));
+}
+.cron-modal-when {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.5rem 0.7rem;
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+  border: 1px solid var(--line-panel);
+  border-radius: 10px;
+}
+.cron-modal-detail {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--fg);
+}
+.cron-modal-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--fg-soft);
+}
+.cron-modal-channel {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  font-size: 0.84rem;
+  color: var(--fg);
+}
+.cron-modal-channel select {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.4rem;
+  color: var(--fg);
+  background: var(--surface);
+  border: 1px solid var(--line-panel);
+  border-radius: 7px;
+}
+.cron-modal-err {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--danger);
+}
+.cron-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.cron-btn-primary {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9px;
+  cursor: pointer;
+  background: var(--ember);
+  color: #fff;
+  border: 1px solid var(--ember);
+}
+.cron-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.settings-link {
+  align-self: flex-start;
+  margin-top: 0.1rem;
+  border: none;
+  background: none;
+  color: var(--fg-soft);
+  font-size: 0.85rem;
+  padding: 0.2rem 0;
+  cursor: not-allowed;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}
+/* Cerrar sesión: separado del resto (margen + línea arriba), tinte danger discreto. */
+.settings-logout {
+  margin-top: 0.35rem;
+  padding: 0.5rem;
+  border: 1px solid var(--line-panel);
+  border-top: 1px solid var(--line-panel);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--danger);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.settings-logout:hover {
+  background: var(--hover);
+}
+
+/* Explorador de archivos: botón toggle arriba a la izquierda + drawer izquierdo. */
+.expbtn {
+  position: fixed;
+  /* Centrado vertical en la franja del header (--header-h). Mismo cálculo que el "+" y el orbe
+     → los tres quedan alineados con el logo del explorador y los tabs. */
+  top: calc(env(safe-area-inset-top) + (var(--header-h) - var(--btn)) / 2);
+  left: 0.85rem;
+  z-index: 21;
+}
+/* Con el explorer abierto, en DESKTOP el toggle se oculta: el cierre vive DENTRO del header del
+   explorer (el ✕ a la derecha). En MOBILE (regla en el @media de abajo) el mismo botón se queda
+   visible convertido en ✕ para cerrar. */
+.app-explorer .expbtn {
+  display: none;
+}
+/* NO modal: columna izquierda fija; el contenido (círculo / vista) se corre a la derecha
+   y queda interactivo. Cerrar = ✕ del explorador. */
+:root {
+  /* Ancho del explorer. Default 250px; el usuario puede arrastrar el borde derecho para
+     ensancharlo — el handle setea `--exp-w-user` (px) en <html> y lo persiste en
+     localStorage. El clamp acota a [14rem, min(40rem, 85vw)]. En mobile la media query
+     de abajo lo pisa con 100vw (full-screen). */
+  /* Un poco más ancho que antes (era 250px) para alojar la activity bar (~3rem) a la izquierda
+     sin comerle ancho al árbol de archivos. */
+  --exp-w: clamp(16rem, var(--exp-w-user, 298px), min(40rem, 85vw));
+}
+/* El explorer en tema CLARO usa blancos y grises claros (no el celeste del resto): re-tinta
+   sus vars localmente. En oscuro se restauran los valores del panel oscuro (abajo). */
+.explorer {
+  --panel: #f5f6f8;
+  --surface: #eceef1;
+  --hover: #e7e9ed;
+  --active: color-mix(in srgb, var(--ember) 14%, #f5f6f8);
+  --active-hover: color-mix(in srgb, var(--ember) 24%, #f5f6f8);
+}
+[data-theme="dark"] .explorer {
+  --panel: #1e1e20;
+  --surface: #2a2a2d;
+  --hover: #2e2e32;
+  --active: color-mix(in srgb, var(--ember) 22%, #1e1e20);
+  --active-hover: color-mix(in srgb, var(--ember) 32%, #1e1e20);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .explorer {
+    --panel: #1e1e20;
+    --surface: #2a2a2d;
+    --hover: #2e2e32;
+    --active: color-mix(in srgb, var(--ember) 22%, #1e1e20);
+    --active-hover: color-mix(in srgb, var(--ember) 32%, #1e1e20);
+  }
+}
+.explorer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--exp-w);
+  z-index: 30;
+  /* 80% opaco (20% transparente) + blur: deja ver algo más del fondo que las notas, pero con
+     el blanco/gris neutro sigue legible. */
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  /* Fila: activity bar (columna de íconos) a la izquierda + el cuerpo del explorador a la derecha. */
+  display: flex;
+  flex-direction: row;
+}
+/* Activity bar (estilo VS Code): tira vertical de íconos pegada al borde izquierdo del explorador.
+   Conmuta el cuerpo entre árbol de archivos / páginas del sistema / notificaciones. */
+.activity-bar {
+  flex: none;
+  width: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: calc(env(safe-area-inset-top) + 0.5rem) 0 0.5rem;
+  /* Un peldaño más oscura/saturada que el panel → se lee como una tira aparte sin estridencia. */
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+}
+/* Botón de la activity bar: cuadrado redondeado, glifo centrado. Activo = mismo lenguaje que la
+   tab activa (fondo --active, sin línea de acento — el owner pidió "con el fondo alcanza"). */
+.actbtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* ancla del badge de notifs y del tooltip [data-tip] */
+  flex: none;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--fg-soft);
+  cursor: pointer;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease;
+}
+.actbtn:hover {
+  color: var(--fg);
+  background: var(--hover);
+}
+.actbtn-on,
+.actbtn-on:hover {
+  color: var(--fg);
+  background: var(--active);
+}
+/* Cuerpo del explorador (a la derecha de la activity bar): head + panel conmutable. */
+.explorer-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* Handle de resize: franja angosta sobre el borde derecho. Al hover/arrastre se ve una
+   línea ember. Oculto en mobile (el explorer es full-screen). */
+.exp-resize {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: 5;
+}
+.exp-resize::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 2px;
+  background: transparent;
+  transition: background 0.12s ease;
+}
+.exp-resize:hover::after,
+body.exp-resizing .exp-resize::after {
+  background: var(--ember);
+}
+/* Durante el arrastre: cursor global + sin selección de texto accidental. */
+body.exp-resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+/* Corre el contenido a la derecha del explorador. */
+.app-explorer {
+  padding-left: var(--exp-w);
+}
+.app-explorer .view {
+  left: var(--exp-w);
+}
+/* El cluster de grabación es position:fixed (no lo corre el padding-left del .app-explorer), así
+   que con el explorer abierto quedaba descentrado respecto al orbe. Lo corremos a la derecha del
+   panel para que centre en el área de contenido, alineado con el orbe. */
+.app-explorer .handsfree-bottom {
+  left: var(--exp-w);
+}
+/* Con explorer abierto, la textbar se corre +exp-w/2; el orbe la sigue, anclado a la
+   derecha de su borde (que ahora está en 50% + exp-w/2 + textbar-w/2). */
+.app-explorer .dock-floating {
+  left: calc(50% + var(--exp-w) / 2 + var(--textbar-w) / 2 + 0.4rem);
+}
+/* Sin archivo abierto: el orbe mantiene su ratio al ANCHO DISPONIBLE (viewport menos el
+   explorer) en vez de saltar a un tamaño fijo chico. */
+.app-explorer:not(.app-page) .orb {
+  --orb-ref: min(calc(100vw - var(--exp-w)), 100vh);
+}
+.explorer-head {
+  display: flex;
+  align-items: center; /* logo+versión y los botones (cog/✕) centrados */
+  justify-content: space-between;
+  /* "Nada se mueve, sólo se va la banda": conservamos el alto del head (min-height) → la marca y
+     los botones quedan EXACTAMENTE donde estaban. Lo único que cambia es que el head pinta la
+     MISMA superficie opaca que el cuerpo (regla de abajo) → desaparece el escalón de opacidad
+     (la "banda"/divisor) sin reacomodar nada. */
+  min-height: calc(env(safe-area-inset-top) + var(--header-h));
+  padding: env(safe-area-inset-top) 0.85rem 0;
+  /* Misma capa opaca que .explorer-body → head y cuerpo son una sola superficie continua. */
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+}
+/* Marca del explorer: la hoja del ceibo + "Ceibo", y abajo chiquita la versión (fecha del
+   último build/deploy). Reemplaza el nombre del usuario que iba acá antes. */
+.exp-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.exp-brand-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  /* "Ceibo" en el color del texto del tema (negro en claro / blanco en oscuro), tipografía
+     normal. El ÚNICO con color especial es el punto (ver .exp-brand-dot). */
+  color: var(--fg);
+}
+.exp-brand-dot {
+  color: var(--ember);
+}
+.exp-version {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  color: var(--fg-soft);
+  opacity: 0.75;
+}
+.exp-version-sha {
+  font-family: monospace;
+}
+.exp-version-tag {
+  padding: 0.05em 0.35em;
+  border-radius: 0.25em;
+  background: color-mix(in srgb, var(--fg-soft) 12%, transparent);
+  font-size: 0.65rem;
+  text-transform: lowercase;
+  letter-spacing: 0.03em;
+}
+/* Mismo badge (.exp-version) pero anclado discreto en la pantalla del orbe (home): abajo-IZQUIERDA
+   (la atribución de Unsplash vive JUSTO ARRIBA, misma esquina; el orbe, centrado; los FABs,
+   abajo-derecha). Fijo al viewport — el .dock es pointer-events:none, así que re-habilitamos el
+   puntero por si el SHA se quiere copiar, sin robarle el push-to-talk al resto del fondo. Respeta
+   el safe-area inferior de iOS. */
+.home-version {
+  position: fixed;
+  left: max(0.75rem, env(safe-area-inset-left));
+  bottom: max(0.5rem, env(safe-area-inset-bottom));
+  z-index: 2;
+  pointer-events: auto;
+}
+/* Atribución de Unsplash (📷 Autor / Unsplash), requerida por sus Guidelines. La CREA el script
+   inline del index.html (o App.tsx al cambiar de foto) como <a id="unsplash-attr">; acá SÓLO
+   posiciona/estila vía clase (el script le pone class="unsplash-attr", ya no un cssText inline).
+   Vive abajo-IZQUIERDA, apilada JUSTO ENCIMA del badge de versión (.home-version) con un gap —
+   antes estaba abajo-derecha y chocaba con la columna de FABs (chat). El offset inferior deja
+   ~1.5rem sobre el badge (que ocupa ~1.2rem) para que no se toquen, respetando el safe-area.
+   La atribución es de la FOTO DE FONDO → sólo visible cuando el fondo se ve. App togglea
+   `bg-visible` en <body> (home mode + explorador cerrado); sin esa clase la ocultamos, así no
+   flota por encima del menú del explorador ni de una nota abierta (que tapan el fondo). El
+   elemento vive en <body> (fuera de #root), por eso el gate es una clase de <body>. */
+.unsplash-attr {
+  position: fixed;
+  left: max(0.75rem, env(safe-area-inset-left));
+  bottom: calc(max(0.5rem, env(safe-area-inset-bottom)) + 1.5rem);
+  z-index: 2;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  text-decoration: none;
+  pointer-events: auto;
+  transition: opacity 0.2s;
+}
+/* Fondo tapado (nota abierta y/o explorador abierto) → ocultamos la atribución: no aporta atribuir
+   una foto que no se ve, y evita que quede por encima del contenido. Sin puntero para no bloquear
+   clicks debajo mientras está oculta. */
+body:not(.bg-visible) .unsplash-attr {
+  opacity: 0;
+  pointer-events: none;
+}
+.explorer-body {
+  flex: 1;
+  overflow: auto;
+  /* Igual que .view-body: el overscroll de la lista de archivos no encadena al documento (evita
+     el rubber-band que despega el chrome fijo en iOS). */
+  overscroll-behavior: contain;
+  /* Padding inferior generoso = "margen invisible": reserva el lugar del cog flotante
+     (abajo-izquierda, a 1.25rem del borde) para que el último archivo de la lista nunca quede
+     debajo / tocándolo. */
+  padding: 0.5rem 0.5rem calc(var(--btn) + 2.25rem);
+  /* Igual que la nota: el cuerpo pinta una capa más opaca ENCIMA de la base del panel (que es
+     el nivel del header). Así el explorador "se corta" en el header a la misma altura y con el
+     mismo escalón de opacidad que la vista de notas (header translúcido / cuerpo más opaco). */
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+}
+/* Pie del explorer: el cog de config FLOTA en la esquina inferior IZQUIERDA de la PÁGINA, pero
+   vive dentro del explorer → sólo se ve con el menú abierto. Mismo offset que el FAB de chat de
+   la derecha (espejado): la esquina inf-izq del explorer (fixed, left:0/bottom:0) ES la de la
+   página. No empuja el layout; el cuerpo le reserva un "margen invisible" con su padding inferior
+   para que los archivos no lo toquen. */
+.explorer-foot {
+  position: absolute;
+  left: max(1.25rem, env(safe-area-inset-left));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  z-index: 6;
+  display: flex;
+  gap: 0.5rem;
+}
+/* El botón de configuración no cambia de color cuando su panel/menú está abierto. */
+.cogbtn-on,
+.cogbtn-on:hover {
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  color: var(--fg-soft);
+}
+.cogbtn-on:hover {
+  background: color-mix(in srgb, var(--hover) 72%, transparent);
+  color: var(--fg);
+}
+/* El launcher de páginas del sistema dejó de ser un FAB flotante: ahora es el panel "sistema"
+   de la activity bar del explorador (ver .sys-panel / .actbtn más abajo). */
+
+/* ── F5: vista "archivo" y banner de wiki archivada ─────────────────────────────────── */
+/* Banner al tope del editor cuando la wiki está archivada (solo lectura). */
+.archived-wiki-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: color-mix(in srgb, var(--ember) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--ember) 30%, transparent);
+  border-radius: var(--r-sm);
+  color: color-mix(in srgb, var(--ember) 70%, var(--fg));
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 0.5rem 0.8rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.01em;
+}
+/* Mensaje "no tenés wikis archivadas" en el panel de archivo. */
+.exp-archive-empty {
+  color: var(--fg-soft);
+  font-size: 0.92rem;
+  padding: 0.5rem 0.75rem;
+}
+/* ── F5: ArchivePanel (system-page) ──────────────────────────────────────── */
+.archive-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.archive-wiki-entry {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.archive-wiki-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.6rem;
+  background: var(--surface-raised);
+}
+.archive-wiki-title-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--fg);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  font-size: 0.95rem;
+}
+.archive-unarchive-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  cursor: pointer;
+  color: var(--fg-soft);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.8rem;
+}
+.archive-unarchive-btn:hover {
+  color: var(--ember);
+  border-color: var(--ember);
+}
+.archive-file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0;
+  background: var(--surface);
+}
+.archive-wiki-title {
+  /* inherits from button */
+}
+.archive-file-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--fg-soft);
+  padding: 0.25rem 1.25rem;
+  width: 100%;
+  text-align: left;
+  font-size: 0.88rem;
+}
+.archive-file-btn:hover {
+  color: var(--fg);
+  background: var(--surface-raised);
+}
+
+/* ── Páginas de sistema: el panel como página en el área del editor ──────────────────
+   El `.view-body` ya da el scroll y el padding. `.system-page` define la columna legible
+   y esconde su propia barra de scroll (el scroll sigue funcionando). */
+.system-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  /* Fix scrollbars: ocultar la barra nativa sin perder el scroll. */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+}
+.system-page::-webkit-scrollbar {
+  display: none; /* WebKit/Blink */
+}
+/* Fix margen: igual que las notas (56rem + 1.6rem de padding-left = mismo borde izquierdo
+   que el texto de una nota). El .settings-popup-body deja de scrollear internamente —
+   scrollea el .view-body = la propia .system-page. */
+.system-page .settings-popup-body {
+  max-width: 56rem; /* = .editor .cm-editor */
+  margin: 0 auto;
+  width: 100%;
+  padding-left: 1.6rem; /* = .cm-foldGutter / .editor-title: mismo borde izq */
+  /* Matar el scroller interno: el scroll lo maneja el .view-body (.system-page). */
+  overflow-y: visible;
+  flex: initial;
+  min-height: 0;
+  /* Quitar el gap que el popup-body usaba para separar del header-popup que ya no está. */
+  gap: 1.25rem;
+  padding-bottom: 2rem;
+}
+/* Cabecera de drill-down de conexiones (cuando se selecciona un canal o servicio).
+   Se alinea a la misma columna que el contenido. */
+.conn-drill-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 56rem;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 0 0.75rem;
+  padding-left: 1.6rem;
+}
+/* El cuerpo del detalle y la lista del panel de conexiones. */
+.system-page .settings-popup-body .conn-detail,
+.system-page .settings-popup-body .agenda-group,
+.system-page .settings-popup-body .agenda-empty {
+  max-width: 100%;
+}
+/* Tab icon inline en la tira de pestañas (para tabs de sistema). */
+.tab-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.3rem;
+  opacity: 0.75;
+  flex: none;
+}
+.exp-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  color: var(--fg);
+  /* +25% sobre el 0.9rem original: lista del explorer más legible. */
+  font-size: 1.125rem;
+  padding: 0.32rem 0.5rem;
+  /* filas como "pills" redondeadas: el hover/activo se lee como una pastilla suave,
+     no una banda de borde a borde. */
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  /* Long-press abre el menú contextual en touch: cortamos el callout/selección nativo de
+     iOS y el flash de tap-highlight que se metían al mantener apretado. */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* :hover SÓLO con puntero fino (mouse). En touch (iOS sobre todo) el primer tap "prende" el
+   hover —resalta la fila y revela el "+"— y el click recién dispara en el SEGUNDO tap; por eso
+   cambiar de carpeta pedía dos toques (uno "select", otro "abrir"). Gateando el hover, en touch
+   el primer tap navega directo. Ver también el bloque @media (hover: none) más abajo. */
+@media (hover: hover) {
+  .exp-row:hover {
+    background: var(--hover);
+  }
+}
+/* Texto de la fila: ocupa lo que queda tras el chevron y elide si no entra. */
+.exp-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Emoji por-nota (estilo Notion) a la izquierda del nombre en el árbol del explorer. */
+.exp-emoji {
+  flex: none;
+  margin-right: 0.3rem;
+  font-size: 1rem;
+  line-height: 1;
+}
+/* Emoji por-nota en la pestaña (tira de tabs). Mismo tamaño que el ícono de las tabs de sistema. */
+.tab-emoji {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.3rem;
+  flex: none;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+/* Picker de emoji (popup del menú contextual del explorer). Mismo skin que .exp-menu. */
+.exp-emoji-picker {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  z-index: 110;
+  width: 16rem;
+  max-width: calc(100vw - 1.5rem);
+  padding: 0.5rem;
+}
+.exp-emoji-search {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--fg);
+  font-size: 0.95rem;
+  padding: 0.4rem 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.exp-emoji-search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+/* Cuerpo scrolleable: la grilla por categorías puede ser larga, pero el popup queda acotado. */
+.exp-emoji-scroll {
+  max-height: 15rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.exp-emoji-group-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--fg-soft);
+  padding: 0.35rem 0.1rem 0.2rem;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}
+.exp-emoji-empty {
+  color: var(--fg-soft);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0.8rem 0.3rem;
+}
+.exp-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.15rem;
+}
+.exp-emoji-cell {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 0.3rem;
+  border-radius: var(--r-sm);
+}
+.exp-emoji-cell:hover {
+  background: var(--accent-deep);
+}
+.exp-emoji-cell-active {
+  background: var(--accent-deep);
+  outline: 1px solid var(--accent);
+}
+.exp-emoji-custom {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+}
+.exp-emoji-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--fg);
+  font-size: 0.95rem;
+  padding: 0.35rem 0.45rem;
+}
+.exp-emoji-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.exp-emoji-set {
+  flex: none;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--fg);
+  border-radius: var(--r-sm);
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.exp-emoji-set:hover {
+  background: var(--accent-deep);
+  color: #fff;
+}
+.exp-emoji-clear {
+  width: 100%;
+  margin-top: 0.4rem;
+  border: none;
+  background: none;
+  color: var(--fg-soft);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.3rem;
+  border-radius: var(--r-sm);
+}
+.exp-emoji-clear:hover {
+  background: var(--danger);
+  color: #fff;
+}
+/* Caja del chevron de disclosure (Obsidian): ancho fijo a la izquierda del label, así
+   carpetas (con chevron) y archivos (caja vacía) alinean su texto al mismo nivel. */
+.exp-chevron-box {
+  flex: 0 0 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.15rem;
+}
+.exp-chevron {
+  width: 0.7rem;
+  height: 0.7rem;
+  fill: none;
+  stroke: var(--fg-soft);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.12s ease;
+}
+.exp-chevron-open {
+  transform: rotate(90deg);
+}
+.exp-wiki-row {
+  font-weight: 600;
+  padding-left: 0.5rem;
+}
+.exp-folder {
+  color: var(--fg-soft);
+}
+/* Contenedor de los hijos de una wiki/carpeta. La línea guía vertical (estilo Obsidian)
+   se dibuja como pseudo-elemento bajo el chevron del padre — `--exp-guide-x` lo posiciona
+   (lo setea el JSX por nivel). `top/bottom` la recortan para no tocar ni el row padre ni
+   sobrar bajo el último hijo. */
+.exp-children {
+  position: relative;
+}
+.exp-children::before {
+  /* Sin líneas-guía de indentación (pedido del owner). */
+  content: none;
+  display: none;
+  position: absolute;
+  left: var(--exp-guide-x, 1.2rem);
+  top: 0.1rem;
+  bottom: 0.3rem;
+  width: 1px;
+  background: transparent;
+}
+/* Archivo abierto: pill suave sin barra ni negrita (Obsidian marca el activo con un
+   fondo sutil, no con acento fuerte). */
+.exp-file-active {
+  background: var(--active);
+  color: var(--fg);
+}
+.exp-file-active:hover {
+  background: var(--active-hover);
+}
+/* Menú contextual del explorer (click derecho / long-press sobre un archivo o carpeta).
+   Look Obsidian: panel redondeado y elevado, items que se resaltan con el acento al hover,
+   separador antes de la acción destructiva. Position fixed con coords del puntero. */
+.exp-menu {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  z-index: 100;
+  min-width: 11rem;
+  padding: 0.3rem;
+}
+.exp-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  color: var(--fg);
+  font-size: 0.95rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.exp-menu-item:hover {
+  background: var(--accent-deep); /* P0-3: ember-deep → WCAG AA con texto blanco */
+  color: #fff;
+}
+/* Acción destructiva: texto en rojo, fondo rojo al hover. */
+.exp-menu-item-danger {
+  color: var(--danger);
+}
+.exp-menu-item-danger:hover {
+  background: var(--danger);
+  color: #fff;
+}
+/* Separador entre grupos del menú. */
+.exp-menu-sep {
+  height: 1px;
+  margin: 0.3rem 0.4rem;
+  background: var(--line);
+}
+/* Menú contextual de la PESTAÑA (click derecho → "Mostrar en explorador"). Mismo look que el
+   menú del explorer, pero portaleado a <body> con position:fixed anclado al cursor. */
+.tab-ctxmenu {
+  position: fixed;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  z-index: 100;
+  min-width: 11rem;
+  padding: 0.3rem;
+}
+.tab-ctxmenu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  color: var(--fg);
+  font-size: 0.95rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.tab-ctxmenu-item:hover {
+  background: var(--accent-deep);
+  color: #fff;
+}
+/* "Mostrar en explorador": resalte transitorio de la fila revelada (se quita por JS tras ~1.6s).
+   Pulso del fondo de acento (más fuerte que el pill del activo) para que el ojo la encuentre
+   tras el scroll, desvaneciéndose. */
+.exp-file-revealed {
+  animation: exp-reveal-pulse 1.6s ease-out;
+}
+@keyframes exp-reveal-pulse {
+  0%,
+  35% {
+    background: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  100% {
+    background: transparent;
+  }
+}
+/* Wrapper para que el "+" pueda vivir al lado del row clicable (hoy son botones
+   hermanos en un flex). El row crece, el "+" es chico a la derecha. */
+.exp-row-wrap {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+}
+.exp-row-wrap .exp-row {
+  flex: 1;
+  min-width: 0;
+}
+.exp-add {
+  flex: 0 0 auto;
+  border: none;
+  background: none;
+  color: var(--fg-soft);
+  font-size: 1rem;
+  line-height: 1;
+  width: 1.6rem;
+  padding: 0 0.25rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.1s linear;
+}
+@media (hover: hover) {
+  .exp-row-wrap:hover .exp-add {
+    opacity: 1;
+  }
+  .exp-add:hover {
+    background: var(--hover);
+    color: var(--fg);
+  }
+}
+/* En touch no hay hover que revele el "+": lo mostramos siempre. Clave para el fix del
+   doble-tap — si el "+" ya está visible, el primer tap en la fila no se "gasta" revelándolo
+   y navega directo. */
+@media (hover: none) {
+  .exp-add {
+    opacity: 1;
+  }
+}
+/* Input inline del "+": se ve como un row más, con borde sutil. */
+.exp-create-input {
+  display: block;
+  width: calc(100% - 1rem);
+  /* matchea el +25% de .exp-row para que el input inline se vea como una fila más. */
+  font-size: 1.125rem;
+  font-family: inherit;
+  padding: 0.3rem 0.4rem;
+  margin: 0.1rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--fg);
+}
+.exp-create-input:focus {
+  outline: none;
+  border-color: var(--fg-soft);
+}
+/* Drop target activo durante drag&drop (neutro, en línea con el resto del chrome gris). */
+.exp-drop-over {
+  background: var(--active);
+  outline: 1px dashed var(--fg-soft);
+  outline-offset: -1px;
+}
+/* Highlight del ÁREA de archivos de una carpeta abierta como drop target (dropear en cualquier
+   parte del área la mueve a esa carpeta, no sólo en su fila). Borde suave sin fondo para no tapar
+   las filas hijas. */
+.exp-children-drop-over {
+  outline: 1px dashed var(--fg-soft);
+  outline-offset: -2px;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--active) 45%, transparent);
+}
+/* "+" de nota nueva: arriba y CENTRADO, a la misma altura que el ☰ del explorador
+   (.expbtn, top-left). Sólo aparece sin nota abierta.
+   Centrado con left:50% + margin-left (no transform) para no pisar el `scale` del
+   :active. Disco circular, mismo look que los otros dos botones de la barra superior. */
+/* "+" nota nueva, dentro de la textbar a la izquierda del input (mismo box que el botón
+   de enviar, hover neutro en vez de ember para distinguir la acción). */
+.textbar-new {
+  flex: none;
+  width: var(--btn);
+  height: var(--btn);
+  border: 1px solid var(--line-panel);
+  background: var(--surface);
+  color: var(--fg-soft);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  font-size: 1.4rem;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease,
+    transform 0.06s ease;
+}
+.textbar-new:hover {
+  color: var(--fg);
+  background: var(--hover);
+}
+.textbar-new:active {
+  transform: scale(0.95);
+}
+
+/* Barra de texto fija abajo, centrada: atajo de teclado al hold-para-hablar. Input +
+   botón enviar a su derecha. Mantiene espacio horizontal entre el orbe (abajo-izquierda
+   cuando hay nota) y el FAB "+" (abajo-derecha). */
+.textbar {
+  position: fixed;
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  width: var(--textbar-w);
+}
+.textbar-input {
+  flex: 1;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--line-panel);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--fg);
+  transition: border-color 0.12s ease;
+}
+.textbar-input:focus {
+  outline: none;
+  border-color: var(--fg-soft);
+}
+.textbar-input:disabled {
+  background: var(--surface-muted);
+  color: var(--fg-soft);
+}
+.textbar-send {
+  flex: none;
+  width: var(--btn);
+  height: var(--btn);
+  border: 1px solid var(--line-panel);
+  background: var(--surface);
+  color: var(--fg-soft);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  font-size: 1.4rem;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease,
+    transform 0.06s ease;
+}
+.textbar-send:hover:not(:disabled) {
+  color: var(--accent);
+  background: var(--hover);
+}
+.textbar-send:active:not(:disabled) {
+  transform: scale(0.95);
+}
+.textbar-send:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+/* Forma de onda del micrófono (canvas): reemplaza al input mientras grabás. La dibuja
+   MicWave a 60fps (scroll fluido de derecha a izquierda). Llena el ancho de la barra. */
+.micwave {
+  flex: 1;
+  display: block;
+  width: 100%;
+  height: var(--btn);
+}
+/* Override de textbar con el explorer abierto (debe quedar después de .textbar para
+   que el orden de specificity ascendente sea correcto y biome no se queje). */
+.app-explorer .textbar {
+  left: calc(50% + var(--exp-w) / 2);
+}
+
+/* Pantallas angostas (mobile): no entra input + enviar + orbe flotante (con nota abierta)
+   en una fila. El orbe flotante se pone CENTRADO JUSTO ARRIBA del input, y la barra usa
+   casi todo el ancho (ya nada le compite al costado). El "+" vive arriba-centrado (barra
+   superior) en todos los tamaños, así que acá ya no se reposiciona. */
+@media (max-width: 32rem) {
+  .app {
+    --textbar-w: calc(100vw - 1.5rem);
+  }
+  .app-page .dock-floating {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(max(1.25rem, env(safe-area-inset-bottom)) + 3.1rem);
+  }
+  /* El explorador ocupa TODA la pantalla (ya no es un drawer lateral). */
+  :root {
+    --exp-w: 100vw;
+  }
+  /* Botones de chrome en las esquinas (mobile): cada uno EQUIDISTANTE de sus dos bordes, con el
+     MISMO inset que el chat/orbe (1.25rem, o el safe-area si es mayor). En desktop el toggle y el
+     "+" se centran en la franja del header (alineados con los tabs); en mobile no hay franja, así
+     que van a la esquina simétrica como el resto. */
+  .expbtn {
+    top: max(var(--gap-btn), env(safe-area-inset-top));
+    left: max(var(--gap-btn), env(safe-area-inset-left));
+  }
+  /* (el override de .newnote-btn vive más abajo, DESPUÉS de su regla base, para ganar el cascade) */
+  /* En mobile el toggle del explorador NO se oculta al abrirlo: se convierte en la ✕ de cerrar
+     (ver App.tsx: ícono condicional). Como el explorer es full-screen (z-index 30), subimos el
+     botón por encima para que quede tocable arriba del panel. Mismo inset de esquina (✕ a la
+     derecha, idéntico a .note-close-head → gesto de cierre consistente arriba-derecha). */
+  .app-explorer .expbtn {
+    display: block;
+    z-index: 31;
+    left: auto;
+    right: max(var(--gap-btn), env(safe-area-inset-right));
+    top: max(var(--gap-btn), env(safe-area-inset-top));
+  }
+  /* Esa ✕ (arriba-derecha) ES ahora el cierre del explorer en mobile → ocultamos el botón
+     redundante "Ocultar explorador" del header del explorer. */
+  .app-explorer .explorer-head-actions {
+    display: none;
+  }
+  /* Sin resize en mobile: el explorer es full-screen. */
+  .exp-resize {
+    display: none;
+  }
+  /* Con el explorer abierto no hay lugar: el orbe y la barra desaparecen; vuelven al cerrarlo.
+     El explorer (z-index alto) tapa el resto igual. */
+  .app-explorer .dock,
+  .app-explorer .textbar {
+    display: none;
+  }
+  /* En mobile no hay espacio para la tira de pestañas: la escondemos. El cuerpo muestra la nota
+     activa igual y la navegación se hace por el explorador (full-screen). El mini-orbe centrado
+     del header se conserva (sigue siendo push-to-talk sobre la nota). */
+  .tabstrip {
+    display: none;
+  }
+  /* En mobile el chat es full-screen (tapa la nota entera): no hay hueco donde recentrar, así que
+     no reservamos ancho a la derecha. Volvemos al padding por defecto del cuerpo. */
+  .app-chat .view-body {
+    padding-right: 1.25rem;
+  }
+  /* En mobile ocultamos el scrollbar nativo en todos los scrollers de nota y chat: el scroll
+     sigue funcionando pero sin las flechas/botones de la barra nativa que se dibujan en
+     algunos navegadores móviles con scrollbar-width:auto/thin. */
+  .view-body,
+  .chatpanel-body,
+  .notif-list {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .view-body::-webkit-scrollbar,
+  .chatpanel-body::-webkit-scrollbar,
+  .notif-list::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-floating .orb-speaking,
+  .orb-idle .orb-core,
+  .orb-connecting .orb-core,
+  .orb-unauth .orb-core {
+    animation: none;
+  }
+  .orb-mover,
+  .orb-hint {
+    transition: none;
+  }
+  /* El pulso de press del orbe es motion: sin él bajo reduced-motion (el cue de estado igual
+     llega por el cambio de color/forma del orbe). */
+  .dock:not(.dock-floating) .orb-armed {
+    animation: none;
+  }
+  /* El hint aparece/desaparece sin animación (el timer de JS lo desmonta igual, no depende del
+     onAnimationEnd, así que esto es seguro). */
+  .orb-hint-in,
+  .orb-hint-out {
+    animation: none;
+  }
+  .chat-thinking span {
+    animation: none;
+  }
+}
+
+/* ============================================================================
+   Chat popup — reemplaza la vieja barra de texto fija. Launcher (FAB) abajo-derecha;
+   panel con historial + composer. Cerrado = solo el orbe central (el FAB lo abre).
+   ============================================================================ */
+
+/* Launcher abajo-derecha: MISMO diseño que el resto del chrome (☰ / + / ⚙) — disco gris
+   sobrio (surface + fg-soft + borde line-panel), nada de acento. Se esconde con el panel
+   abierto. Mismo tamaño que los demás botones (--btn). */
+.chat-fab {
+  position: fixed;
+  right: max(1.25rem, env(safe-area-inset-right));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  z-index: 25;
+}
+/* Badge contador de no-leídos: se ancla a la esquina superior derecha del ícono 🔔 de la
+   activity bar (.actbtn, position:relative). */
+.notif-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 1.05rem;
+  height: 1.05rem;
+  padding: 0 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--accent, #e0533d);
+  color: #fff;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--bg, #1a1a1a);
+}
+/* Panel "notificaciones" INLINE: el inbox del agente renderizado como cuerpo del explorador
+   (antes era el popup flotante .notif-panel). Ocupa el alto disponible y scrollea. */
+.notif-panel-inline {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+}
+/* Fila de acciones del inbox (Marcar todo) arriba de la lista. */
+.notif-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.4rem 0.5rem 0.2rem;
+}
+.notif-markall {
+  border: none;
+  background: none;
+  color: var(--fg-soft);
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.4rem;
+}
+.notif-markall:hover {
+  color: var(--fg);
+  background: color-mix(in srgb, var(--hover) 60%, transparent);
+}
+.notif-empty {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--fg-soft);
+  font-size: 0.85rem;
+}
+.notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.3rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0.55rem 0.5rem;
+  border-radius: 0.55rem;
+  color: var(--fg);
+}
+.notif-item:hover {
+  background: color-mix(in srgb, var(--hover) 55%, transparent);
+}
+.notif-dot {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: 0.35rem;
+  border-radius: 50%;
+  background: transparent;
+}
+.notif-item-unread .notif-dot {
+  background: var(--accent, #e0533d);
+}
+.notif-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.notif-item-title {
+  font-size: 0.88rem;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.notif-item-unread .notif-item-title {
+  font-weight: 600;
+}
+.notif-item-when {
+  font-size: 0.72rem;
+  color: var(--fg-soft);
+}
+/* Panel "sistema" de la activity bar: la lista de páginas del sistema (ex menú del launcher-fab),
+   renderizada como cuerpo del explorador. Mismo lenguaje que el árbol/inbox. */
+.sys-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.4rem;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+}
+.sys-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  color: var(--fg);
+  font-size: 0.92rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  position: relative;
+}
+.sys-item:hover {
+  background: var(--hover);
+}
+/* Página ya abierta (como tab): resaltada con el fondo activo + punto a la derecha. */
+.sys-item-on {
+  background: var(--active);
+  font-weight: 500;
+}
+.sys-dot {
+  margin-left: auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ember);
+  flex: none;
+}
+.sys-sep {
+  height: 1px;
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+  margin: 0.35rem 0.4rem;
+}
+/* Botón flotante orb/notas (minimizar/restaurar). En MOBILE vive abajo a la IZQUIERDA (esta
+   regla); en DESKTOP es un item de `.fab-column` (abajo-derecha) que pisa esta posición fija. */
+.minimize-fab {
+  position: fixed;
+  left: max(1.25rem, env(safe-area-inset-left));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  z-index: 25;
+}
+/* Con el panel de chat abierto ocultamos el "+" (el composer del chat ya trae "nueva nota").
+   La minimize-fab (orb/notas) SÍ se muestra con el chat abierto (pedido del owner): el chat es
+   una tarjeta abajo-derecha y la fab vive abajo-izquierda → no se tapan. En maximized (abajo) y
+   en mobile (media query, chat full-screen) sí se sigue ocultando. */
+.app-chat .newnote-btn {
+  display: none;
+}
+/* Con el chat maximizado (cubre todo el viewport) ocultamos el botón — no hay dónde ponerlo. */
+.app-chat:has(.chatpanel.maximized) .minimize-fab {
+  display: none;
+}
+/* Panel: tarjeta abajo-derecha, alto acotado. En mobile pasa a full-screen (media query). */
+.chatpanel {
+  position: fixed;
+  right: max(1.25rem, env(safe-area-inset-right));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  z-index: 35;
+  width: var(--chat-panel-w);
+  height: min(40rem, calc(100vh - 2.5rem));
+  display: flex;
+  flex-direction: column;
+  /* 80% opaco (igual que el explorer) + blur. Sin borde (pedido del owner). */
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  border-radius: var(--r-lg);
+  box-shadow: 0 14px 40px -12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  /* Transición suave entre rincón ⇄ maximizado. */
+  transition:
+    width 0.18s ease,
+    height 0.18s ease,
+    inset 0.18s ease,
+    border-radius 0.18s ease;
+}
+/* Maximizado: el panel cubre el viewport ENTERO (explorer y header incluidos). `inset:0`
+   + z-index 35 (por encima del explorer z:30 y del header z:1). Sin border-radius ni
+   márgenes — ocupa hasta el borde del viewport (safe-area en mobile ya lo cubre el
+   media-query de abajo). Anclamos con `inset` y soltamos el width/height fijos. */
+.chatpanel.maximized {
+  inset: 0;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+}
+/* Acciones del header del chat (maximizar + cerrar), agrupadas a la derecha. */
+.chatpanel-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: none;
+}
+/* Overlay de drag-drop: cubre el panel mientras arrastrás archivos encima. */
+.chatpanel-drop {
+  position: absolute;
+  inset: 0.4rem;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  padding: 1rem;
+  color: var(--fg);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  background: color-mix(in srgb, var(--panel) 86%, transparent);
+  border: 2px dashed var(--ember);
+  border-radius: 12px;
+  pointer-events: none;
+}
+.chatpanel-drop svg {
+  color: var(--ember);
+}
+.chatpanel-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  /* Top/right = --gap-btn → los botones del header (maximizar/cerrar) quedan al MISMO margen de
+     esquina que el resto del chrome. Left mayor para que respire el título; bottom separa del log.
+     Top suma el safe-area-inset-top: en mobile/standalone el panel es full-screen (inset:0) y SIN
+     esto el botón de cerrar queda DEBAJO de la status bar del iPhone (área de batería/notch) →
+     tapado e intocable. Mismo patrón que .explorer-head. En desktop el inset es 0 (la tarjeta no
+     toca el borde superior), así que no cambia nada. */
+  padding: calc(env(safe-area-inset-top) + var(--gap-btn)) var(--gap-btn) 0.6rem 0.85rem;
+}
+.chatpanel-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chatpanel-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.9rem;
+  scrollbar-width: thin;
+}
+.chatpanel-empty {
+  margin: auto;
+  text-align: center;
+  color: var(--fg-soft);
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+/* Una fila del historial: usuario a la derecha, agente a la izquierda. */
+.chat-msg {
+  display: flex;
+}
+.chat-msg-user {
+  justify-content: flex-end;
+}
+.chat-msg-agent {
+  justify-content: flex-start;
+}
+/* Aviso de sistema (conversación compactada / reiniciada): línea centrada y atenuada, estilo
+   divisor — no es una burbuja. Distinta de la voz del agente y de un error. */
+.chat-msg-system {
+  justify-content: center;
+}
+.chat-system-line {
+  max-width: 85%;
+  text-align: center;
+  color: var(--fg-soft);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-style: italic;
+  padding: 0.15rem 0.6rem;
+  opacity: 0.85;
+}
+.chat-bubble {
+  max-width: 85%;
+  font-family: var(--font-body);
+  font-size: 0.97rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  /* El `body` desactiva la selección de texto global (push-to-talk/orb/explorer). Acá la
+     re-habilitamos: el texto de los mensajes del chat SÍ se puede seleccionar y copiar.
+     En touch, el long-press sobre la burbuja ofrece selección/copiar nativo. */
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
+}
+/* Usuario: burbuja sobria (superficie gris, redondeada). */
+.chat-bubble-user {
+  background: var(--surface);
+  color: var(--fg);
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--r-md);
+  border-bottom-right-radius: 5px;
+}
+.chat-voice-tag {
+  color: var(--fg-soft);
+}
+/* Envío FALLIDO (Fase B.2): la burbuja del usuario queda (el texto NO se pierde) con un
+   borde de alerta, y debajo el motivo + "Reintentar" (si el fallo es transitorio). */
+.chat-msg-failed {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+.chat-bubble-failed {
+  border: 1px solid color-mix(in srgb, var(--danger) 55%, transparent);
+}
+.chat-send-failed {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  max-width: 85%;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--danger);
+}
+.chat-send-retry {
+  flex: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
+  border-radius: var(--r-pill);
+  padding: 0.1rem 0.65rem;
+  cursor: pointer;
+}
+.chat-send-retry:hover {
+  background: color-mix(in srgb, var(--danger) 22%, transparent);
+}
+/* Agente: texto plano (sin burbuja), markdown a la izquierda — como en la referencia. */
+.chat-bubble-agent {
+  color: var(--fg);
+  padding: 0.1rem 0.1rem;
+}
+/* Markdown dentro de la respuesta del agente: márgenes apretados, tipografía legible. */
+.chat-bubble-agent > :first-child {
+  margin-top: 0;
+}
+.chat-bubble-agent > :last-child {
+  margin-bottom: 0;
+}
+.chat-bubble-agent p {
+  margin: 0 0 0.5rem;
+}
+.chat-bubble-agent ul,
+.chat-bubble-agent ol {
+  margin: 0 0 0.5rem;
+  padding-left: 1.2rem;
+}
+.chat-bubble-agent li {
+  margin: 0.15rem 0;
+}
+.chat-bubble-agent h1,
+.chat-bubble-agent h2,
+.chat-bubble-agent h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0.6rem 0 0.35rem;
+}
+.chat-bubble-agent h1 {
+  font-size: 1.2rem;
+}
+.chat-bubble-agent h2 {
+  font-size: 1.1rem;
+}
+.chat-bubble-agent h3 {
+  font-size: 1rem;
+}
+.chat-bubble-agent a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.chat-bubble-agent code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85em;
+  background: var(--code-bg);
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+}
+.chat-bubble-agent pre {
+  background: var(--code-bg);
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--r-sm);
+  overflow-x: auto;
+  margin: 0 0 0.5rem;
+}
+.chat-bubble-agent pre code {
+  background: none;
+  padding: 0;
+}
+.chat-bubble-agent blockquote {
+  margin: 0 0 0.5rem;
+  padding: 0.2rem 0.5rem 0.2rem 0.75rem;
+  border-left: 2px solid rgba(44, 62, 10, 0.45); /* P2-11: tinte oliva botánico (como landing) */
+  background: rgba(44, 62, 10, 0.05); /* fondo oliva muy sutil — solo en claro es perceptible */
+  border-radius: 0 2px 2px 0;
+  color: var(--fg-soft);
+}
+/* Reproductor de la nota de voz del agente (blob inline). Ancho acotado; si abajo hay
+   transcripción, un respiro. El look nativo del control varía por browser — sólo lo
+   encuadramos. */
+.chat-audio {
+  display: block;
+  width: 100%;
+  max-width: 15rem;
+  height: 2.4rem;
+  margin-bottom: 0.4rem;
+}
+.chat-audio:last-child {
+  margin-bottom: 0;
+}
+/* Player ESPEJO de la respuesta de voz EN CURSO (autoplay de un turno iniciado por voz):
+   refleja la reproducción del <audio> compartido — botón pausa/play, progreso y tiempo.
+   Misma caja que .chat-audio; al terminar el clip, la burbuja vuelve al <audio controls>. */
+.chat-audio-live {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--code-bg);
+}
+.chat-audio-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+.chat-audio-seek {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+.chat-audio-time {
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  color: var(--fg-soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Puntitos de "pensando" (la burbuja del agente todavía sin texto). */
+.chat-thinking {
+  display: inline-flex;
+  gap: 0.28rem;
+  padding: 0.35rem 0.1rem;
+}
+.chat-thinking span {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--fg-soft);
+  animation: chat-dot 1.2s ease-in-out infinite;
+}
+.chat-thinking span:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.chat-thinking span:nth-child(3) {
+  animation-delay: 0.36s;
+}
+@keyframes chat-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-0.18rem);
+  }
+}
+
+/* Indicador EFÍMERO de actividad en el chat: la burbuja del agente "pendiente" con los puntitos
+   "···" + el tool-call en curso (`activity`) al lado. Se actualiza en vivo y desaparece al cerrar
+   el turno; NO se persiste en el historial. */
+.chat-bubble.chat-activity {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.chat-activity-label {
+  font-size: 0.92rem;
+  font-style: italic;
+  color: var(--fg-soft);
+  text-wrap: balance;
+}
+
+/* Indicador PERSISTENTE de sub-agente en el chat: una píldora fija con un orbe ⦿ pulsante +
+   "N sub-agente(s) trabajando…". A diferencia del indicador efímero (arriba), NO se pisa con
+   cada tool-call: dura todo el turno y sólo se va cuando el conteo vuelve a 0. Es la contraparte
+   en el chat de los mini-orbs que decoran el orb (ausente con una nota abierta). */
+.chat-subagent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: flex-start;
+  margin: 0.1rem 0;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.chat-subagent-orb {
+  flex: none;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0.4rem color-mix(in srgb, var(--accent) 70%, transparent);
+  animation: chat-subagent-pulse 1.6s ease-in-out infinite;
+}
+.chat-subagent-label {
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--accent-deep) 60%, var(--fg));
+  white-space: nowrap;
+}
+@keyframes chat-subagent-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-subagent-orb {
+    animation: none;
+  }
+}
+
+/* Composer: + (nota nueva), input, mic (hold para grabar), enviar. Mientras grabás, el
+   input se reemplaza por los palitos (MicWave) — igual que la vieja textbar. */
+.chatpanel-composer {
+  flex: none;
+  display: flex;
+  /* flex-end: cuando el textarea crece (multilínea) los botones quedan alineados al pie,
+     a la altura de la última línea, en vez de flotando centrados. */
+  align-items: flex-end;
+  gap: 0.35rem;
+  padding: 0.6rem 0.7rem;
+  border-top: 1px solid var(--line-panel);
+}
+/* Campo del composer: caja ESTÁTICA (flex:1). El input lo llena; la onda se superpone
+   (absolute) mientras grabás → el layout NO se reflowea y el mic queda fijo. */
+.composer-field {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+}
+.composer-field .micwave {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Recorta el canvas (fondo oscuro + onda blanca) al mismo radio que el input. */
+  border-radius: 1.2rem;
+}
+.composer-input {
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.97rem;
+  line-height: 1.35;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--line-panel);
+  border-radius: 1.2rem;
+  background: var(--surface);
+  color: var(--fg);
+  transition: border-color 0.12s ease;
+  /* Auto-grow: el alto lo fija el JS (scrollHeight) hasta este tope; de ahí scrollea interno.
+     `resize:none` saca el grip de redimensionado; `display:block` evita el gap inline-baseline
+     que mete un <textarea> y lo alinea con la onda del mic. */
+  display: block;
+  resize: none;
+  max-height: 9.5rem;
+  overflow-y: auto;
+}
+.composer-input:focus {
+  outline: none;
+  border-color: var(--fg-soft);
+}
+.composer-input:disabled {
+  background: var(--surface-muted);
+  color: var(--fg-soft);
+}
+.composer-icon {
+  flex: none;
+  position: relative; /* ancla del tooltip de hover */
+  width: 2.4rem;
+  height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--line-panel);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--fg-soft);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease,
+    transform 0.06s ease;
+}
+.composer-icon:hover {
+  color: var(--fg);
+  background: var(--hover);
+}
+.composer-icon:active {
+  transform: scale(0.94);
+}
+.composer-mic[aria-disabled="true"] {
+  opacity: 0.45;
+}
+/* Mientras grabás: el mic se tiñe de ember (la flor) para marcar "estás hablando". */
+.composer-mic-on,
+.composer-mic-on:hover {
+  color: var(--ember);
+  border-color: var(--ember);
+  background: var(--surface);
+}
+.composer-send {
+  flex: none;
+  position: relative; /* ancla del tooltip de hover */
+  width: 2.4rem;
+  height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--line-panel);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--fg-soft);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease,
+    transform 0.06s ease;
+}
+.composer-send:hover:not(:disabled) {
+  color: var(--fg);
+  background: var(--hover);
+}
+.composer-send:active:not(:disabled) {
+  transform: scale(0.94);
+}
+.composer-send:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+/* El "+" usa el mismo disco que el mic/enviar; deshabilitado (offline/grabando) se atenúa. */
+.composer-icon:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+/* Input de archivo: fuera de la vista pero presente (lo dispara el botón "+"). */
+.composer-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* Bandeja de adjuntos pendientes (entre el historial y el composer). */
+.composer-tray {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.5rem 0.7rem 0;
+}
+.composer-tray-note {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--fg-soft);
+}
+.composer-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+/* Chip de un adjunto pendiente: miniatura/etiqueta + nombre + ✕. */
+.composer-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 12rem;
+  padding: 0.25rem 0.3rem 0.25rem 0.25rem;
+  background: var(--surface);
+  border: 1px solid var(--line-panel);
+  border-radius: 10px;
+}
+.composer-chip-thumb {
+  width: 1.9rem;
+  height: 1.9rem;
+  object-fit: cover;
+  border-radius: 6px;
+  flex: none;
+}
+.composer-chip-doc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  flex: none;
+  border-radius: 6px;
+  background: var(--ember);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.composer-chip-name {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.composer-chip-x {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--fg-soft);
+  cursor: pointer;
+}
+.composer-chip-x:hover {
+  color: var(--fg);
+  background: var(--hover);
+}
+.composer-chip-x svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+/* Adjuntos dentro de la burbuja del usuario (turno mandado): miniaturas + chips. */
+.chat-bubble-text {
+  display: block;
+}
+.chat-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+.chat-attachments:last-child {
+  margin-bottom: 0;
+}
+.chat-attach-img {
+  max-width: 11rem;
+  max-height: 11rem;
+  border-radius: var(--r-sm);
+  display: block;
+}
+.chat-attach-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 12rem;
+  padding: 0.3rem 0.5rem;
+  background: var(--panel);
+  border: 1px solid var(--line-panel);
+  border-radius: var(--r-sm);
+}
+.chat-attach-kind {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: var(--ember);
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+}
+.chat-attach-name {
+  font-size: 0.82rem;
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* El orbe central NO cambia de tamaño al abrir el chat: queda igual (pedido del owner) — su
+   tamaño es fijo (ver `.orb`), independiente del panel. (Con una nota abierta el orbe
+   directamente no se renderiza — ver App.) */
+
+/* Mobile: el panel ocupa toda la pantalla (ya no es una tarjeta en la esquina). */
+@media (max-width: 32rem) {
+  .chatpanel,
+  .chatpanel.maximized,
+  .settings-popup {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 0;
+  }
+  /* En mobile el chat ya es full-screen → "maximizar" no aporta nada. Escondemos el botón. */
+  .chatpanel-maximize-btn {
+    display: none;
+  }
+  /* Con el explorer abierto (full-screen en mobile) escondemos el chat. El cog vive DENTRO del
+     explorer, así que en mobile el popup de config queda full-screen sobre él. */
+  .app-explorer .chat-fab,
+  .app-explorer .chatpanel {
+    display: none;
+  }
+  /* En mobile el chat es full-screen → ocultamos los FABs que no tienen dónde ponerse. */
+  .app-chat .minimize-fab,
+  .app-chat .newnote-btn {
+    display: none;
+  }
+  /* En mobile con el explorer abierto también ocultamos el minimize-fab. */
+  .app-explorer .minimize-fab {
+    display: none;
+  }
+  /* En mobile con una nota abierta (full-screen) el orbe-FAB no tiene sentido. */
+  .app-page .minimize-fab {
+    display: none;
+  }
+  /* En mobile el explorer es full-screen → el launcher-fab-wrap quedaría fuera de pantalla
+     (calc(100vw + 1.25rem)); lo ocultamos directamente. Idem el FAB/panel de notificaciones,
+     que se apilan sobre el launcher (feature crons-delivery). */
+  .app-explorer .launcher-fab-wrap,
+  .app-explorer .notif-fab,
+  .app-explorer .notif-panel {
+    display: none;
+  }
+}
+
+/* "+" nota nueva: flota ARRIBA a la DERECHA (centrado en la franja del header, misma altura que
+   el toggle del explorer de la izquierda). Solo aparece sin página abierta (vista orb pura). En
+   mobile con el explorer abierto se oculta (ver @media abajo). */
+.newnote-btn {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + (var(--header-h) - var(--btn)) / 2);
+  right: max(1.25rem, env(safe-area-inset-right));
+  z-index: 25;
+}
+
+/* ── Columna de FABs (abajo-derecha) ─────────────────────────────────────────────────────
+   orb / notas / nueva-nota apilados ARRIBA del botón de chat, como una sola columna abajo a la
+   derecha — en MOBILE y en DESKTOP. Cada FAB es de por sí `position:fixed`; dentro de la columna
+   pasan a ser items del flex (`position:relative`). El único que se "escapa" de la columna es el
+   toggle del explorer cuando el explorer está abierto en mobile: vuelve a ser la ✕ flotante
+   arriba-derecha (ver el @media (max-width) de más abajo). La visibilidad por estado (sin tabs,
+   chat/explorer abiertos, maximized) la maneja la condición de cada botón + las reglas de abajo. */
+.fab-column {
+  position: fixed;
+  right: max(1.25rem, env(safe-area-inset-right));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  /* Sin transición en `bottom`: al abrir/cerrar el chat la columna se reubica de golpe (el "+"
+     de nueva-nota y el toggle orb/notas aparecen en su lugar, no deslizándose hacia abajo). */
+}
+/* Dentro de la columna los FABs son items del flex: anulamos su posición fija individual y los
+   devolvemos al `position:relative` del grupo base (ancla del tooltip). El toggle del explorador
+   (.expbtn) NO está en la columna — vive arriba-izquierda con su position:fixed propio. */
+.fab-column .newnote-btn,
+.fab-column .minimize-fab,
+.fab-column .chat-fab {
+  position: relative;
+  inset: auto;
+}
+@media (max-width: 32rem) {
+  /* Mobile: inset de esquina más ajustado, como el resto del chrome mobile (--gap-btn). */
+  .fab-column {
+    right: max(var(--gap-btn), env(safe-area-inset-right));
+    bottom: max(var(--gap-btn), env(safe-area-inset-bottom));
+  }
+}
+@media (min-width: 32.01rem) {
+  /* Con el chat abierto (tarjeta abajo-derecha) la columna se corre hacia ARRIBA del panel para no
+     quedar tapada — "encima del chat". Se acota con min() para no salirse del viewport en pantallas
+     bajas (no más arriba de 7rem del top). En mobile el chat es full-screen (la tapa), así que esto
+     es solo desktop. */
+  .app-chat .fab-column {
+    bottom: min(
+      calc(max(1.25rem, env(safe-area-inset-bottom)) + min(40rem, 100vh - 2.5rem) + 0.6rem),
+      calc(100vh - 7rem)
+    );
+  }
+  /* Con el chat MAXIMIZADO (cubre todo el viewport) no hay dónde ponerla → se oculta entera. */
+  .app-chat:has(.chatpanel.maximized) .fab-column {
+    display: none;
+  }
+}
+
+/* Cerrar la nota abierta en MOBILE: vive DENTRO del header de la nota (.view-head-tabs), no como
+   FAB flotante. Comparte el look redondo translúcido del chrome (está en el grupo de botones de
+   arriba). En desktop cada pestaña tiene su ✕ → este botón se oculta; sólo aparece en mobile,
+   donde la tira de tabs está escondida. `margin-left:auto` lo empuja a la derecha del header
+   (único hijo visible al ocultarse el .tabstrip); `align-self:center` lo centra en la franja del
+   header sin pegarlo al borde de la nota. Con el explorer full-screen (que tapa la nota) no
+   compite. */
+.note-close-head {
+  display: none;
+  align-self: center;
+  margin-left: auto;
+}
+
+/* ── Blame por línea ("quién escribió qué") ───────────────────────────────────────────────
+   El toggle ya NO es un botón por-nota: es la preferencia global de la página de sistema
+   "Ediciones". Cuando está prendida, el editor abre el gutter de blame (abajo). */
+
+/* Con el blame prendido el editor abre un GUTTER izquierdo (padding extra del .cm-content,
+   la clase la pone FileEditor): ahí viven la franja de color y los avatares sin pisar el
+   fold-gutter ni el texto. Al apagar, el padding vuelve y el texto recupera su lugar. */
+.editor-blame .cm-content {
+  padding-left: 2.6rem;
+}
+
+/* Las líneas blameadas: franja de color por autor en el margen izquierdo (pseudo-elemento
+   ABSOLUTO en el gutter → no desplaza el texto). El color llega por línea en --blame-color
+   (lo setea la decoration de CM6, ver blame.ts). El hover muestra el tooltip PROPIO
+   (.blame-tip, manejado por blame.ts) — el `title` nativo no funciona sobre el
+   contenteditable y en touch no existe. */
+.cm-line.cm-blame {
+  position: relative;
+}
+.cm-line.cm-blame::before {
+  content: "";
+  position: absolute;
+  left: -0.75rem;
+  top: 0.15em;
+  bottom: 0.15em;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--blame-color);
+  pointer-events: none;
+}
+/* Histórico (commits del bot / previos a la atribución real, o source desconocido en wiki
+   personal): gris y más tenue, sin avatar. */
+.cm-line.cm-blame-historic::before {
+  opacity: 0.45;
+}
+
+/* Avatar del autor al INICIO de cada tramo contiguo: en el gutter, a la izquierda de la
+   franja. El chip de adentro es EL MISMO de los member chips del explorer
+   (.exp-member-chip de memberChips.css: foto o iniciales grises) — el wrapper solo
+   posiciona. El tap (touch) o hover abre el tooltip. */
+.cm-blame-avatar {
+  position: absolute;
+  left: -2.15rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* El chip de la IA ("ceibo"): mismo formato de chip, pero el orbe ember de marca. */
+.cm-blame-chip-ai {
+  background: radial-gradient(circle at 32% 28%, #ffc7a3, var(--ember) 62%, var(--ember-deep));
+}
+
+/* Tooltip propio del blame (lo posiciona blame.ts, fixed sobre el body): quién + metadata
+   (handle, fecha, vía web / por ceibo). Reemplaza al `title` nativo. */
+.blame-tip {
+  position: fixed;
+  z-index: 60;
+  display: none;
+  max-width: 16rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.5rem;
+  background: var(--panel);
+  border: 1px solid var(--line-panel);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+.blame-tip-who {
+  font-weight: 600;
+  color: var(--fg);
+}
+.blame-tip-meta {
+  color: var(--fg-soft);
+}
+
+/* El ✕ de cerrar nota en MOBILE conserva su `margin-left:auto` (definido arriba): SIEMPRE
+   en el margen superior DERECHO del header de la nota. (El toggle de blame vive en la
+   botonera izquierda y no lo desplaza.) */
+@media (max-width: 32rem) {
+  /* En mobile no hay tira de pestañas (la ocultamos arriba) → la fila del header de la nota
+     quedaría reservando el alto de este botón y empujando la nota hacia abajo (un "header"/gap
+     arriba de la nota). Para que la nota llegue HASTA ARRIBA DE TODO, el ✕ FLOTA sobre la nota
+     (absoluto, arriba-derecha respetando el safe-area) en vez de ocupar una fila: así la franja
+     del header colapsa a 0 y el cuerpo (.view-body, margin-top:-1px) sube hasta el borde. */
+  .note-close-head {
+    display: flex;
+    position: absolute;
+    /* Mismo inset de esquina que el resto del chrome mobile (menu/+/chat/orbe): equidistante. */
+    top: max(var(--gap-btn), env(safe-area-inset-top));
+    right: max(var(--gap-btn), env(safe-area-inset-right));
+    z-index: 7;
+    margin-left: 0;
+  }
+  .app-explorer .note-close-head {
+    display: none;
+  }
+  /* "+" nota nueva: misma esquina simétrica que el resto del chrome mobile (equidistante de sus
+     dos bordes). Va acá —después de la regla base de .newnote-btn— para ganar el cascade. */
+  .newnote-btn {
+    top: max(var(--gap-btn), env(safe-area-inset-top));
+    right: max(var(--gap-btn), env(safe-area-inset-right));
+  }
+  /* chat y orbe: mismo inset de esquina reducido en mobile (sus reglas base usan 1.25rem para
+     desktop; acá lo bajamos a --gap-btn para que queden equidistantes como el resto). */
+  .chat-fab {
+    right: max(var(--gap-btn), env(safe-area-inset-right));
+    bottom: max(var(--gap-btn), env(safe-area-inset-bottom));
+  }
+  .minimize-fab {
+    left: max(var(--gap-btn), env(safe-area-inset-left));
+    bottom: max(var(--gap-btn), env(safe-area-inset-bottom));
+  }
+  /* En mobile el explorer ocupa toda la pantalla → el "+" no tiene dónde mostrarse. */
+  .app-explorer .newnote-btn {
+    display: none;
+  }
+}
+
+/* Acciones del header del explorer: cog (config) + cerrar, agrupados a la derecha. */
+.explorer-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Debug overlay (?debug=1): panel ARRIBA con status + estado del SSE + log de eventos.
+   Monoespaciado, semi-transparente, por encima de todo, sin bloquear el tacto. Ocupa la franja
+   superior pero deja libre la esquina SUPERIOR-DERECHA (right:5rem): ahí vive el HUD de FPS del
+   orbe, para que los dos readouts de debug no se pisen. */
+.debug-overlay {
+  position: fixed;
+  top: max(0.5rem, env(safe-area-inset-top));
+  left: 0.5rem;
+  right: max(5rem, env(safe-area-inset-right));
+  z-index: 9999;
+  pointer-events: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: #e8e8ea;
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--r-sm);
+  padding: 0.4rem 0.55rem;
+  max-height: 45vh;
+  overflow: hidden;
+}
+.debug-head {
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  padding-bottom: 0.2rem;
+}
+.debug-head b {
+  color: #ffd479;
+}
+.debug-log div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Hint always-on bajo el orbe: texto chico con el status BÁSICO del orbe (idle / grabando /
+   pensando / hablando / conectando). El detalle del tool-call va al chat, no acá. Va SIEMPRE
+   sobre la imagen de fondo del dock → texto blanco con sombra. Para que se lea sobre CUALQUIER parte de la imagen (zonas
+   claras incluidas) lleva un box translúcido oscuro tipo píldora detrás (mismo patrón que los
+   tooltips [data-tip]): scrim oscuro + blur, neutro en claro y oscuro porque el texto es blanco. */
+.orb-hint {
+  /* Píldora ajustada al texto: centrada bajo el orbe, sin ocupar de más (no se renderiza vacío). */
+  align-self: center;
+  margin: 0;
+  max-width: min(22rem, 80vw);
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--r-pill);
+  background: rgba(20, 20, 22, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.22);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  /* Más tenue/grisecito que el blanco puro, pero legible sobre la imagen del dock gracias
+     a la sombra + el scrim. Suaviza el hint sin perder contraste. */
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  text-wrap: balance;
+  pointer-events: none;
+  /* Se encoge HACIA el orbe (arriba) al aparecer/desaparecer: el orbe es el origen visual. */
+  transform-origin: center top;
+}
+/* Segundo underhint (mini-orbs de sub-agentes): hereda la píldora del .orb-hint pero más
+   chico/tenue para no pelear con el principal — queda visualmente subordinado, justo debajo. */
+.orb-hint-sub {
+  margin-top: 0.3rem;
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(20, 20, 22, 0.34);
+}
+/* Aparición: el hint EMERGE desde el orbe (se despliega hacia abajo, creciendo). */
+.orb-hint-in {
+  animation: hint-emerge 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* Desaparición: el hint MIGRA de vuelta al orbe (sube y se encoge hacia él) y luego se desmonta. */
+.orb-hint-out {
+  animation: hint-into-orb 0.32s cubic-bezier(0.55, 0, 0.67, 0.3) forwards;
+}
+@keyframes hint-emerge {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes hint-into-orb {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-22px) scale(0.45);
+  }
+}
+
+/* === Manos libres: onda blanca grande + timer bajo el orbe === */
+/* Cluster de grabación FIJO al borde inferior de la pantalla (independiente del orbe y los hints):
+   columna [onda full-width arriba, controles abajo], anclada a X del bottom edge. El contenedor es
+   pointer-events:none (no bloquea): la onda deja pasar el tap a la talkzone (frena) y sólo la
+   píldora de controles re-habilita el tacto para la ✕. */
+.handsfree-bottom {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom) + 1.25rem);
+  left: 0;
+  right: 0;
+  z-index: 25; /* sobre la talkzone (z:3) y el resto del dock */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem; /* distancia entre la onda y el botón de cancelar */
+  pointer-events: none;
+}
+.handsfree-wave-wrap {
+  /* Onda de BORDE A BORDE, arriba del botón de cancelar. pointer-events:none → el tap sobre la
+     onda atraviesa a la talkzone y frena la grabación. */
+  width: 100vw;
+  pointer-events: none;
+}
+.micwave-handsfree {
+  width: 100%;
+  height: 2.25rem;
+  border-radius: 0; /* máscara CUADRADA (pedido del owner) */
+  display: block;
+}
+.handsfree-controls {
+  pointer-events: auto; /* la ✕ recibe clicks */
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--r-pill);
+  background: rgba(20, 20, 22, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.handsfree-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--ember, #f97316);
+  animation: hf-pulse 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes hf-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+}
+.handsfree-timer {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.82);
+  letter-spacing: 0.02em;
+  min-width: 2.8rem;
+  text-align: center;
+}
+.handsfree-cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.handsfree-cancel:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.handsfree-cancel svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .handsfree-dot {
+    animation: none;
+  }
+}
+
+/* Grabando: el orbe SIEMPRE queda en su sitio (no se recentra). La onda flota debajo con
+   position:absolute (top:100%) sin empujar el orbe; los controles (✕) viven fijos al borde
+   inferior (`.handsfree-controls`), así que la ✕ es siempre visible/tappable en cualquier alto
+   de pantalla — ya no hace falta el override de landscape sobre la onda. */
+
+/* Log de actividad del modo debug: la lista de herramientas del turno. Card themed que se ve
+   bien tanto sobre la imagen del dock como dentro del panel del chat. */
+.activity-log {
+  align-self: center;
+  max-width: min(22rem, 84vw);
+  background: var(--surface);
+  border: 1px solid var(--line-panel);
+  border-radius: 10px;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.8rem;
+  color: var(--fg-soft);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+.activity-log-head {
+  display: block;
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-soft);
+  margin-bottom: 0.3rem;
+}
+.activity-log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.activity-log-item {
+  color: var(--fg);
+  line-height: 1.3;
+}
+/* En el chat el log va inline como un "mensaje" más → un poco de margen para separarlo. */
+.chatpanel-body .activity-log {
+  margin: 0.25rem 0 0;
+  align-self: flex-start;
+}
+
+/* Fila de settings con checkbox (modo debug): el control va a la derecha del label. */
+.settings-row-check {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+.settings-row-check input {
+  flex: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.settings-row-sub {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--fg-soft);
+  font-weight: 400;
+  margin-top: 0.1rem;
+}
+
+/* ── Wiki Management F4 ─────────────────────────────────────────────────────── */
+
+/* Área del botón "Nueva wiki" debajo del listado */
+.exp-wiki-add-wrap {
+  padding: 0.35rem 0.5rem 0.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
+  margin-top: 0.15rem;
+}
+
+/* Botón "Nueva wiki": ghost/full-width, muted */
+.exp-new-wiki-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--fg-soft);
+  font-size: 0.88rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease;
+}
+.exp-new-wiki-btn:hover {
+  color: var(--fg);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+/* El "+" del botón nueva wiki: mismo color que el "+" de las filas de wiki */
+.exp-new-wiki-plus {
+  font-size: 1.1rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--ember) 70%, var(--fg-soft));
+  flex: none;
+}
+.exp-new-wiki-btn:hover .exp-new-wiki-plus {
+  color: var(--ember);
+}
+
+/* Input inline para crear una nueva wiki */
+.exp-create-wiki-input {
+  margin-left: 0.4rem;
+  width: calc(100% - 0.8rem);
+}
+
+/* Popup de compartir wiki */
+.wiki-share-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  z-index: 1000;
+  min-width: 280px;
+  max-width: min(480px, calc(100vw - 2rem));
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  padding: 0;
+}
+.wiki-share-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem 0.65rem;
+  border-bottom: 1px solid var(--line);
+}
+.wiki-share-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--fg);
+}
+.wiki-share-close {
+  background: none;
+  border: none;
+  color: var(--fg-soft);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--r-sm);
+}
+.wiki-share-close:hover {
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+  color: var(--fg);
+}
+.wiki-share-section {
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+}
+.wiki-share-section:last-child {
+  border-bottom: none;
+}
+.wiki-share-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg-soft);
+  margin-bottom: 0.5rem;
+}
+.wiki-share-member-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+.wiki-share-member-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--fg);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wiki-share-you {
+  color: var(--fg-soft);
+  font-size: 0.8rem;
+}
+.wiki-share-remove-btn {
+  background: none;
+  border: none;
+  color: var(--fg-soft);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: var(--r-sm);
+  flex: none;
+}
+.wiki-share-remove-btn:hover {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+}
+.wiki-share-pending-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0;
+}
+.wiki-share-pending-email {
+  flex: 1;
+  font-size: 0.88rem;
+  color: var(--fg-soft);
+  font-style: italic;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wiki-share-invite-input {
+  width: 100%;
+  background: color-mix(in srgb, var(--surface) 60%, var(--bg));
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--fg);
+  font-size: 0.88rem;
+  padding: 0.4rem 0.6rem;
+  box-sizing: border-box;
+}
+.wiki-share-invite-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.wiki-share-dir-list {
+  margin-top: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+.wiki-share-dir-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--fg);
+  font-size: 0.88rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  text-align: left;
+}
+.wiki-share-dir-item:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.wiki-share-dir-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.wiki-share-dir-handle {
+  color: var(--fg-soft);
+  font-size: 0.8rem;
+  margin-left: auto;
+}
+.wiki-share-empty,
+.wiki-share-loading {
+  font-size: 0.82rem;
+  color: var(--fg-soft);
+  padding: 0.25rem 0;
+}
+.wiki-share-email-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+.wiki-share-email-row .wiki-share-invite-input {
+  flex: 1;
+}
+.wiki-share-invite-btn {
+  background: var(--accent-deep);
+  border: none;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  flex: none;
+}
+.wiki-share-invite-btn:hover:not(:disabled) {
+  opacity: 0.88;
+}
+.wiki-share-invite-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Modal de borrar wiki — overlay full-page centrado con blur total del fondo */
+.wiki-delete-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* El backdrop cubre toda la pantalla: tinte oscuro + blur de verdad sobre la app */
+.wiki-delete-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+.wiki-delete-modal {
+  /* z-index sobre el backdrop para que el modal NO quede blureado */
+  position: relative;
+  z-index: 1;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  width: min(420px, calc(100vw - 2rem));
+  padding: 1.5rem 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.wiki-delete-modal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--danger);
+  margin: 0;
+}
+.wiki-delete-modal-warning {
+  font-size: 0.9rem;
+  color: var(--fg);
+  line-height: 1.5;
+  margin: 0;
+}
+.wiki-delete-modal-label {
+  font-size: 0.85rem;
+  color: var(--fg-soft);
+}
+.wiki-delete-modal-input {
+  width: 100%;
+  background: color-mix(in srgb, var(--surface) 60%, var(--bg));
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--fg);
+  font-size: 0.9rem;
+  padding: 0.45rem 0.65rem;
+  box-sizing: border-box;
+}
+.wiki-delete-modal-input:focus {
+  outline: none;
+  border-color: var(--danger);
+}
+.wiki-delete-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.wiki-delete-modal-cancel {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--fg);
+  font-size: 0.88rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.wiki-delete-modal-cancel:hover {
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+}
+.wiki-delete-modal-confirm {
+  background: var(--danger);
+  border: none;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.wiki-delete-modal-confirm:hover:not(:disabled) {
+  opacity: 0.88;
+}
+.wiki-delete-modal-confirm:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Toast de notificación efímera (bottom-center del explorer) */
+.exp-toast {
+  position: fixed;
+  bottom: max(4.5rem, calc(env(safe-area-inset-bottom) + 4rem));
+  left: 50%;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--fg) 92%, transparent);
+  color: var(--bg);
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  z-index: 1200;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  animation: toast-in 0.18s ease;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}

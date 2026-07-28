@@ -1,0 +1,1 @@
+El cold-open del chat local (archima) baja otro escalón: las credenciales del Agent Vault que se mintean al abrir/reusar la sesión (schedule, viewer, control, tavily) ahora se setean EN PARALELO en vez de en serie (~4.6s → ~2s). El AV es concurrency-safe para escrituras al mismo vault y ssh ControlMaster multiplexa las llamadas.

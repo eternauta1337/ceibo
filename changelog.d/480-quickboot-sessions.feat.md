@@ -1,0 +1,1 @@
+Las conversaciones largas con el asistente local ahora se compactan solas y se reinician cada madrugada (4am de tu zona horaria), para que el primer mensaje de la mañana responda rápido. Nuevos comandos: `/compact` (achica el contexto sin perder el hilo) y `/status` (estado de la sesión: modelo, tamaño de contexto y próximo reinicio).

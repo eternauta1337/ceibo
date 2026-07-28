@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Unsplash BG lab — ceibo</title>
+<!--
+  Lab para elegir queries del fondo Unsplash de ceibo. Abrilo directo en el browser
+  (file://) — no necesita server. Replica los parámetros de prod (ver el handler de
+  /api/bg en packages/web-server/src/web.ts: /photos/random + orientation=landscape +
+  content_filter=high; el render usa urls.raw + w=2560&q=80&auto=format&fit=max).
+
+  La ACCESS KEY de Unsplash NO está en este archivo (es un secreto, el repo es público
+  para la familia): la pegás una vez en el campo de abajo y queda en el localStorage de
+  TU browser. Conseguí/rota la key en https://unsplash.com/oauth/applications
+  El query de prod vive en UNSPLASH_BG_QUERIES (web-server); para cambiarlo, editá esa
+  constante y deployá la web. Este lab es solo para tantear queries antes.
+-->
+<style>
+  body { font-family: -apple-system, sans-serif; background: #1c1917; color: #e7e5e4; margin: 0; padding: 24px; }
+  h1 { font-size: 18px; margin: 0 0 4px; } .sub { color: #a8a29e; font-size: 13px; margin-bottom: 16px; }
+  .row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+  input { background: #292524; border: 1px solid #44403c; color: #e7e5e4; border-radius: 8px; padding: 8px 12px; font-size: 14px; }
+  #query { flex: 1; min-width: 280px; } #key { min-width: 320px; }
+  button { background: #e76f51; color: #fff; border: 0; border-radius: 8px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
+  button.ghost { background: #292524; border: 1px solid #44403c; color: #d6d3d1; }
+  .chip { background: #292524; border: 1px solid #44403c; color: #d6d3d1; border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; }
+  .chip:hover { border-color: #e76f51; }
+  #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; margin-top: 16px; }
+  .card { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 16/9; background: #292524; }
+  .card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card .credit { position: absolute; bottom: 0; left: 0; right: 0; font-size: 11px; padding: 4px 8px;
+    background: linear-gradient(transparent, rgba(0,0,0,.7)); color: #fff; }
+  .credit a { color: #fff; }
+  #status { color: #a8a29e; font-size: 13px; margin-top: 8px; }
+  .keyrow { margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<h1>Unsplash BG lab</h1>
+<div class="sub">Mismos parámetros que prod (<code>/photos/random</code> + <code>orientation=landscape</code> + <code>content_filter=high</code>).
+Cada "Probar" = 1 request del tier (50/h), trae 12 fotos al azar del pool — lo que verías rotar en la web.
+Click en una foto → abre la versión hi-res (<code>raw + w=2560</code>), la que serviría prod.</div>
+
+<div class="row keyrow">
+  <input id="key" type="password" placeholder="Unsplash Access Key (se guarda en este browser)">
+  <button type="button" class="ghost" onclick="saveKey()">Guardar key</button>
+  <button type="button" class="ghost" onclick="clearKey()">Borrar key</button>
+  <span id="keystate" class="sub" style="margin:0"></span>
+</div>
+
+<div class="row">
+  <input id="query" placeholder="query, ej: forest sunlight ceibo flowers vivid"
+    value="forest sunlight ceibo tree flowers colorfull vivid summer spring flowers">
+  <button type="button" onclick="run()">Probar</button>
+</div>
+<div class="row" id="chips"></div>
+<div id="status"></div>
+<div id="grid"></div>
+
+<script>
+const KEY_STORE = "unsplash_lab_access_key";
+// Pool de referencia para tantear; el de prod vive en UNSPLASH_BG_QUERIES (web-server).
+const QUERIES = [
+  "forest sunlight ceibo tree flowers colorfull vivid summer spring flowers",
+  "sunbeams through trees",
+  "forest canopy sunlight",
+  "misty forest morning",
+  "spring wildflowers meadow",
+];
+const chips = document.getElementById("chips");
+for (const q of QUERIES) {
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = q;
+  b.onclick = () => { document.getElementById("query").value = q; run(); };
+  chips.appendChild(b);
+}
+
+function getKey() { return localStorage.getItem(KEY_STORE) || ""; }
+function refreshKeyState() {
+  const k = getKey();
+  document.getElementById("keystate").textContent = k ? "✓ key guardada en este browser" : "⚠ falta la key";
+  if (k && !document.getElementById("key").value) document.getElementById("key").value = k;
+}
+// biome-ignore lint/correctness/noUnusedVariables: called from onclick attributes
+function saveKey() {
+  const k = document.getElementById("key").value.trim();
+  if (!k) { alert("Pegá la access key primero."); return; }
+  localStorage.setItem(KEY_STORE, k); refreshKeyState();
+}
+// biome-ignore lint/correctness/noUnusedVariables: called from onclick attributes
+function clearKey() { localStorage.removeItem(KEY_STORE); document.getElementById("key").value = ""; refreshKeyState(); }
+refreshKeyState();
+
+async function run() {
+  const key = getKey();
+  if (!key) { document.getElementById("status").textContent = "Falta la access key — pegala arriba y Guardar."; return; }
+  const query = document.getElementById("query").value.trim();
+  const status = document.getElementById("status");
+  const grid = document.getElementById("grid");
+  if (!query) { status.textContent = "Falta la query."; return; }
+  status.textContent = "Buscando…"; grid.innerHTML = "";
+  const url = "https://api.unsplash.com/photos/random?count=12" +
+    "&query=" + encodeURIComponent(query) +
+    "&orientation=landscape&content_filter=high&client_id=" + encodeURIComponent(key);
+  try {
+    const resp = await fetch(url);
+    const remaining = resp.headers.get("x-ratelimit-remaining");
+    if (!resp.ok) { status.textContent = "Error " + resp.status + " — " + await resp.text(); return; }
+    const photos = await resp.json();
+    status.textContent = photos.length + " fotos · quedan " + (remaining ?? "?") + " requests esta hora";
+    for (const p of photos) {
+      const card = document.createElement("div");
+      card.className = "card";
+      const hires = p.urls.raw + "&w=2560&q=80&auto=format&fit=max";
+      card.innerHTML = '<a href="' + hires + '" target="_blank"><img loading="lazy" src="' + p.urls.small + '"></a>' +
+        '<div class="credit"><a href="' + p.links.html + '" target="_blank">' +
+        (p.user?.name ?? "?") + "</a> · ❤️" + (p.likes ?? 0) + " · " + p.width + "×" + p.height + "</div>";
+      grid.appendChild(card);
+    }
+  } catch (e) { status.textContent = "Falló: " + e; }
+}
+</script>
+</body>
+</html>

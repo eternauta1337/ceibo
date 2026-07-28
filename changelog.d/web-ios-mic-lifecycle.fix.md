@@ -1,0 +1,1 @@
+Rediseño del ciclo de mic/audio en iOS: se sacó la manipulación de `navigator.audioSession` (cortaba el track y dejaba "llamadas" colgadas por Bluetooth), ya no se muestra "grabando" hasta que entra audio real (se espera el `unmute` del track) y el mic se calienta al volver al foreground y se suelta en background.

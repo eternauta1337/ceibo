@@ -1,0 +1,1 @@
+Ceibo ahora es instalable como app: desde Safari en iPhone, "Agregar a inicio" la abre a pantalla completa (standalone), sin la barra de Safari. Así el permiso del micrófono se concede una vez por sesión en vez de re-pedirse en cada refresh (límite de WebKit que solo afecta a las pestañas).

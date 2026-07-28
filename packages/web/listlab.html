@@ -1,0 +1,17 @@
+<!doctype html>
+<!-- Harness manual del editor de notas (NO va al build de prod: vite build solo toma
+     index.html). Monta AtomicCodeMirrorEditor con las MISMAS extensiones que Editor.tsx
+     para verificar en un browser real lo que los tests headless no cubren (keymaps,
+     dispatch contra un EditorView de verdad, interacción con el stack del atomic).
+     Uso: pnpm --filter @ceibo/web dev → http://localhost:5173/listlab.html -->
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>listlab — editor harness</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/listlab.tsx"></script>
+  </body>
+</html>

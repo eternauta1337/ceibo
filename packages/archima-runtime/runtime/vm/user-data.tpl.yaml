@@ -1,0 +1,36 @@
+#cloud-config
+# Cloud-init de la VM molde de archima. La VM es CPU-only (no GPU), corre opencode.
+# __SSH_PUBKEY__ lo sustituye spawn-vm.sh con la pubkey de ~/.ssh/archima_vm.pub del host.
+hostname: archima-vm
+manage_etc_hosts: true
+
+users:
+  - name: archima
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
+    shell: /bin/bash
+    lock_passwd: true
+    ssh_authorized_keys:
+      - __SSH_PUBKEY__
+
+ssh_pwauth: false
+package_update: true
+packages:
+  - curl
+  - unzip
+  - ca-certificates
+  # node como utilidad base (scripts del agente, paridad con la vm ma). opencode trae su propio
+  # runtime embebido pero NO lo expone como `node`. noble trae nodejs 18.x → alcanza.
+  - nodejs
+
+runcmd:
+  # opencode (trae su runtime; no necesita node del sistema). PINEADO a 1.17.8: la 1.17 trae
+  # `task(background:true)` (sub-agentes async) que el coordinador usa; "latest" derivaba a 1.16.0
+  # (sin background) y rompía la delegación. Bumpear acá = rebuildear la golden (op de infra,
+  # requiere bajar las VMs vivas que comparten el backing file — ver build-golden.sh/warm-golden.sh).
+  - su - archima -c 'curl -fsSL https://opencode.ai/install | bash -s -- --version 1.17.8'
+  - su - archima -c 'echo "export PATH=$HOME/.opencode/bin:$PATH" >> ~/.bashrc'
+  # asegurar el comando `node` (algunos paquetes sólo dejan /usr/bin/nodejs)
+  - sh -c '[ -e /usr/bin/node ] || ln -s /usr/bin/nodejs /usr/bin/node'
+  - touch /home/archima/.archima-ready
+
+final_message: "archima VM lista tras $UPTIME s"

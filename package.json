@@ -1,0 +1,36 @@
+{
+  "name": "ceibo",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.2",
+  "description": "ceibo: asistente personal multi-usuario / multi-wiki sobre Managed Agents cloud. Monorepo pnpm de 15 paquetes: store / agent / gateway / web-server / cli y más.",
+  "scripts": {
+    "start": "pnpm --filter @ceibo/gateway start",
+    "dev": "node scripts/dev.mjs",
+    "dev:gateway": "pnpm --filter @ceibo/gateway dev",
+    "dev:setup": "node scripts/dev-setup.mjs",
+    "cli": "pnpm --filter @ceibo/cli cli",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "test:cov": "vitest run --coverage",
+    "lint": "biome check packages",
+    "prepare": "husky || true",
+    "deploy:staging": "bash scripts/deploy-staging.sh",
+    "promote:prod": "bash scripts/promote-prod.sh",
+    "deploy:archima:staging": "bash scripts/deploy-archima.sh staging",
+    "deploy:archima:prod": "bash scripts/deploy-archima.sh prod",
+    "deploy:archima:dev": "bash scripts/deploy-archima.sh dev",
+    "changelog": "node scripts/changelog.mjs render",
+    "changelog:release": "node scripts/changelog.mjs release"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2",
+    "@types/node": "^22.19.19",
+    "@vitest/coverage-v8": "^3.2.6",
+    "husky": "^9",
+    "tsx": "^4.22.3",
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.6"
+  }
+}

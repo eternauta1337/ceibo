@@ -1,0 +1,28 @@
+{
+  "name": "@ceibo/rem-runner",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Runner per-wiki para REM en gpuhost: sonnet planifica, gemma ejecuta, scratch efímero, sin VMs.",
+  "bin": {
+    "rem-runner": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "pnpm build:runner && pnpm build:batch && pnpm build:dry",
+    "build:runner": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=cjs --outfile=dist/rem-runner.cjs",
+    "build:batch": "esbuild src/batch-main.ts --bundle --platform=node --target=node22 --format=cjs --outfile=dist/rem-batch.cjs --external:@anthropic-ai/sdk --external:better-sqlite3",
+    "build:dry": "esbuild src/dry-run.ts --bundle --platform=node --target=node22 --format=cjs --outfile=dist/rem-dry.cjs --external:@anthropic-ai/sdk --external:better-sqlite3",
+    "run": "tsx src/index.ts",
+    "run:dry": "tsx src/dry-run.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ceibo/gateway": "workspace:*"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "vitest": "^3.2.6"
+  }
+}

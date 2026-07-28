@@ -1,0 +1,1 @@
+Los sub-agentes ahora trabajan en segundo plano: Ceibo queda libre para seguir charlando mientras la tarea corre (un mini-orbe la muestra trabajando) y te avisa con el resultado apenas termina. Además, el fondo por defecto pasa a "amanecer entre árboles".

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA instalable. En iOS el permiso de micrófono NO sobrevive al refresh de una
+         pestaña (límite de WebKit, igual en todos los browsers del iPhone). Instalada a la
+         pantalla de inicio corre en standalone: sesión persistente, sin recargas → el mic se
+         autoriza una vez por launch en vez de en cada refresh. Las meta `apple-*` son las que
+         disparan el modo standalone en iOS (el manifest es para Android/desktop). -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Ceibo" />
+    <!-- Fondo: SOLO Unsplash (vía /api/bg). NO hay imágenes locales.
+         Inline en el <head> para correr ANTES del primer paint, y dos cosas pasan acá:
+         1) Aplicar el theme guardado (data-theme) → el color sólido de fondo (`#app-bg` =
+            CSS var(--bg)) es el correcto desde el frame 0. Ese color ES el fondo definitivo
+            cuando Unsplash no llega / está offline (sin foto, sin flash negro).
+         2) Pedir /api/bg: cuando responde, pinta el placeholder LQIP (la misma foto a 32px,
+            borrosa, ~3KB) en #app-bg-img al instante, precarga la full-res y, al decodear,
+            funde a la nítida sacando el blur (transición por CSS, ver index.css).
+         La atribución ("📷 Autor / Unsplash") la inyecta el script cuando hay foto. -->
+    <script>
+      (() => {
+        // 1) Theme pre-paint: mismo criterio que main.tsx (light/dark fuerzan; "auto"/ausente
+        //    no setea atributo → la media query del CSS sigue al sistema). Acá, antes del paint,
+        //    para que `var(--bg)` del color sólido resuelva correcto desde el primer frame.
+        try {
+          const t = localStorage.getItem("ceibo_theme");
+          if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+        } catch { /* localStorage no disponible → "auto" por media query */ }
+
+        // Pinta la foto en #app-bg-img: setea --orb-bg (background-image de la capa) y marca
+        // data-ready (CSS funde de borroso/oculto a nítido). El script corre en <head>, así que
+        // la capa puede no existir aún → si no está, reintenta al DOMContentLoaded.
+        var ready = false;
+        var paint = (u, blurred) => {
+          document.documentElement.style.setProperty("--orb-bg", `url(${u})`);
+          var apply = () => {
+            var el = document.getElementById("app-bg-img");
+            if (!el) { document.addEventListener("DOMContentLoaded", apply, { once: true }); return; }
+            // blurred=true → placeholder (queda con el blur del CSS); false → nítida (saca blur).
+            if (blurred) el.setAttribute("data-ph", "");
+            else el.removeAttribute("data-ph");
+            el.setAttribute("data-ready", "");
+          };
+          apply();
+        };
+        // Carga `u` fuera de pantalla y, al decodear, la pinta nítida (sin blur). Idempotente:
+        // el primero que gana (placeholder o full) deja de importar cuando llega la full.
+        var loadSharp = (u) => {
+          var img = new Image();
+          var done = () => { if (!ready) { ready = true; paint(u, false); } };
+          img.onload = done;
+          img.onerror = () => { /* la full falló: queda el placeholder borroso o el color */ };
+          img.src = u;
+          if (img.decode) img.decode().then(done).catch(() => {});
+        };
+
+        // 2) /api/bg. Sin key / Unsplash caído → { url: null } → no tocamos nada: queda el color
+        //    sólido del theme (fondo definitivo en ese caso). 2s de timeout como el server.
+        var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+        var timer = ctrl ? setTimeout(() => { ctrl.abort(); }, 2000) : null;
+        fetch("/api/bg", { signal: ctrl?.signal })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            if (timer) clearTimeout(timer);
+            if (!d?.url) return; // sin foto → color sólido del theme
+            // Placeholder borroso al instante (si vino); en paralelo, la full nítida.
+            if (d.placeholder) paint(d.placeholder, true);
+            loadSharp(d.url);
+            // Atribución requerida por Unsplash Guidelines: línea discreta en la esquina inferior.
+            if (d.author && d.authorLink) {
+              const attr = document.createElement("a");
+              attr.id = "unsplash-attr";
+              // Posición/estilo por CLASE (.unsplash-attr en index.css): abajo-IZQUIERDA, apilada
+              // sobre el badge de versión. Antes iba inline abajo-derecha y chocaba con los FABs.
+              attr.className = "unsplash-attr";
+              attr.href = `${d.authorLink}?utm_source=ceibo&utm_medium=referral`;
+              attr.target = "_blank";
+              attr.rel = "noopener noreferrer";
+              attr.textContent = `📷 ${d.author} / Unsplash`;
+              const addAttr = () => {
+                if (document.body) { document.body.appendChild(attr); }
+                else { document.addEventListener("DOMContentLoaded", () => { document.body.appendChild(attr); }); }
+              };
+              addAttr();
+            }
+          })
+          .catch(() => { if (timer) clearTimeout(timer); /* color sólido queda */ });
+      })();
+    </script>
+    <!-- theme-color alineado al rediseño plano (claro/oscuro por sistema), ya no el cielo viejo. -->
+    <meta name="theme-color" content="#f6f6f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a1c" media="(prefers-color-scheme: dark)" />
+    <title>Ceibo</title>
+  </head>
+  <body>
+    <!-- Capa de FONDO separada de #root: es position:fixed y la dimensiona viewportRotateFix.ts
+         desde visualViewport, que NUNCA queda stale al rotar (a diferencia del layout
+         viewport/ICB). Así el fondo cubre siempre el ancho real y no deja la banda gris a la
+         derecha. Vive fuera de #root para que React no la pise.
+         `#app-bg` pinta el color sólido del theme (var(--bg)) — el fondo cuando no hay foto.
+         `#app-bg-img` (hijo, inset:0 → hereda el ancho) lleva la foto de Unsplash: arranca
+         oculta, muestra el placeholder borroso y funde a la nítida (ver index.css). -->
+    <div id="app-bg"><div id="app-bg-img"></div></div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,1 @@
+Los deploys ahora reconstruyen el bundle web cuando cambia un paquete que se compila dentro de él (ej. el orbe), no solo cuando cambia packages/web. Antes, un cambio solo-en-orbe podía no verse en staging/prod porque el bundle quedaba viejo. Nuevo flag --rebuild-web para forzar el rebuild.

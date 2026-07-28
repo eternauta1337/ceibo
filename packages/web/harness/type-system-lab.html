@@ -1,0 +1,192 @@
+<!doctype html>
+<!-- Harness DEV-ONLY para feat-type-system (P1-6, P2-9, P2-11, P3-12).
+     Renderiza los elementos clave afectados por los cambios de CSS: editor-title,
+     blockquotes, explorer rows, tabs, chat bubbles, panels, memberChips.
+     Abrir con: http://localhost:5174/harness/type-system-lab.html -->
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lab · type-system (P1-6, P2-9, P2-11, P3-12)</title>
+  <!-- Carga el CSS de la app (con los cambios del branch) -->
+  <link rel="stylesheet" href="../src/index.css" />
+  <link rel="stylesheet" href="../src/memberChips.css" />
+  <style>
+    body { padding: 2rem; background: var(--bg); color: var(--fg); font-family: var(--font-body); }
+    .section { margin-bottom: 2.5rem; }
+    .section h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--fg-soft); margin: 0 0 1rem; }
+    .row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-start; }
+    .card { background: var(--panel); border-radius: var(--r-lg); padding: 1.5rem; min-width: 280px; }
+    /* Simula .editor-body para el editor-title */
+    .editor-body-sim { padding: 1rem; }
+    /* Tabs demo */
+    .tab-strip-sim { display: flex; gap: 2px; align-items: flex-end; padding: 0 0.5rem; }
+    /* Explorer demo */
+    .exp-body-sim { display: flex; flex-direction: column; gap: 2px; padding: 0.5rem; width: 220px; }
+    /* Chat demo */
+    .chat-body-sim { display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem; max-width: 340px; }
+  </style>
+</head>
+<body data-theme="dark">
+
+<h1 style="font-size:0.9rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--fg-soft);margin-bottom:2rem">
+  feat-type-system — P1-6 · P2-9 · P2-11 · P3-12
+  <button type="button" onclick="document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')"
+    style="margin-left:1rem;font:inherit;font-size:0.8rem;padding:0.3rem 0.6rem;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);color:var(--fg);cursor:pointer">
+    Toggle tema
+  </button>
+</h1>
+
+<!-- P1-6: editor-title weight 500 vs 600 -->
+<div class="section">
+  <h2>P1-6 · editor-title (font-weight 500, letter-spacing -0.02em)</h2>
+  <div class="row">
+    <div class="card editor-body-sim">
+      <input class="editor-title" value="Mi nota de backlog" readonly style="width:100%" />
+      <div style="margin-top:0.5rem;font-size:0.85rem;color:var(--fg-soft)">
+        <code>font-weight: 500; letter-spacing: -0.02em</code> — más liviano, editorial
+      </div>
+    </div>
+    <div class="card editor-body-sim">
+      <input style="display:block;width:100%;font-size:2.1rem;font-weight:600;letter-spacing:-0.015em;background:transparent;border:none;color:var(--fg);font-family:var(--font-display)"
+        value="Mi nota de backlog" readonly />
+      <div style="margin-top:0.5rem;font-size:0.85rem;color:var(--fg-soft)">
+        <code>font-weight: 600</code> — antes (semibold)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- P2-9: radius tokens -->
+<div class="section">
+  <h2>P2-9 · Escala de radios (tokens)</h2>
+  <div class="row">
+    <!-- Explorer rows -->
+    <div class="card">
+      <div style="font-size:0.75rem;color:var(--fg-soft);margin-bottom:0.5rem">Explorer rows (--r-sm = 8px)</div>
+      <div class="exp-body-sim">
+        <button type="button" class="exp-row" style="font-size:1.125rem">backlog.md</button>
+        <button type="button" class="exp-row" style="font-size:1.125rem;background:var(--active)">futuros.md</button>
+        <button type="button" class="exp-row" style="font-size:1.125rem">users.md</button>
+      </div>
+    </div>
+    <!-- Tabs -->
+    <div class="card">
+      <div style="font-size:0.75rem;color:var(--fg-soft);margin-bottom:0.5rem">Tabs (--r-md = 12px, solo arriba)</div>
+      <div class="tab-strip-sim">
+        <div class="tab" style="background:color-mix(in srgb, var(--panel) 80%, transparent)">backlog.md ✕</div>
+        <div class="tab" style="background:color-mix(in srgb, var(--panel) 50%, transparent)">futuros.md ✕</div>
+      </div>
+    </div>
+    <!-- Menu -->
+    <div class="card">
+      <div style="font-size:0.75rem;color:var(--fg-soft);margin-bottom:0.5rem">Explorer menu (--r-md = 12px)</div>
+      <div class="exp-menu" style="position:relative;display:inline-block">
+        <button type="button" class="exp-menu-item">Renombrar</button>
+        <button type="button" class="exp-menu-item">Mover</button>
+        <button type="button" class="exp-menu-item exp-menu-item-danger">Eliminar</button>
+      </div>
+    </div>
+    <!-- exp-create-input -->
+    <div class="card">
+      <div style="font-size:0.75rem;color:var(--fg-soft);margin-bottom:0.5rem">exp-create-input (--r-sm = 8px)</div>
+      <input class="exp-create-input" value="nueva nota..." style="position:relative" />
+    </div>
+    <!-- chat bubble -->
+    <div class="card">
+      <div style="font-size:0.75rem;color:var(--fg-soft);margin-bottom:0.5rem">Chat bubble usuario (--r-md = 12px)</div>
+      <div class="chat-body-sim">
+        <div style="display:flex;justify-content:flex-end">
+          <div class="chat-bubble-user">¿Qué hay en el backlog?</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+          <div class="chat-bubble-user">¿Y para mobile?</div>
+        </div>
+      </div>
+    </div>
+    <!-- panel -->
+    <div style="background:color-mix(in srgb,var(--panel) 80%,transparent);backdrop-filter:blur(18px);border-radius:var(--r-lg);padding:1rem;width:200px">
+      <div style="font-size:0.75rem;color:var(--fg-soft);margin-bottom:0.5rem">Panel (--r-lg = 16px)</div>
+      <div style="font-size:0.9rem">Settings / Chat panel</div>
+    </div>
+    <!-- pill -->
+    <div class="card">
+      <div style="font-size:0.75rem;color:var(--fg-soft);margin-bottom:0.5rem">Pills (--r-pill = 999px)</div>
+      <button type="button" style="border-radius:var(--r-pill);border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:0.5rem 1.2rem;font:inherit">Ya tengo cuenta</button>
+    </div>
+  </div>
+</div>
+
+<!-- P2-11: olive blockquote tint -->
+<div class="section">
+  <h2>P2-11 · Tinte oliva en blockquotes (editor + chat)</h2>
+  <div class="row">
+    <!-- Chat blockquote -->
+    <div class="card chat-body-sim">
+      <div style="font-size:0.75rem;color:var(--fg-soft);margin-bottom:0.5rem">Chat bubble agente con blockquote</div>
+      <div class="chat-bubble-agent">
+        <p>Acá hay un resumen del backlog:</p>
+        <blockquote>El orb debe leerse sobre cualquier fondo fotográfico.</blockquote>
+        <p>Eso es lo más importante según la prioridad P0-2.</p>
+      </div>
+    </div>
+    <!-- Comparison: before (no tint) -->
+    <div class="card chat-body-sim">
+      <div style="font-size:0.75rem;color:var(--fg-soft);margin-bottom:0.5rem">Antes (sin tinte, borde --line)</div>
+      <div style="font-size:0.97rem;line-height:1.5">
+        <p style="margin:0 0 0.5rem">Acá hay un resumen del backlog:</p>
+        <blockquote style="margin:0 0 0.5rem;padding-left:0.75rem;border-left:2px solid var(--line);color:var(--fg-soft)">
+          El orb debe leerse sobre cualquier fondo fotográfico.
+        </blockquote>
+        <p style="margin:0">Eso es lo más importante según la prioridad P0-2.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- P3-12: memberChips + success token -->
+<div class="section">
+  <h2>P3-12 · Micro-limpiezas (memberChips vars + --success token)</h2>
+  <div class="row">
+    <!-- Member chips -->
+    <div class="card">
+      <div style="font-size:0.75rem;color:var(--fg-soft);margin-bottom:0.5rem">Member chips (vars --fg-soft / --fg)</div>
+      <div class="exp-members">
+        <button type="button" class="exp-members-btn">
+          <span class="exp-member-chip" style="--chip-mix: 68%">A</span>
+          <span class="exp-member-chip" style="--chip-mix: 45%">B</span>
+          <span class="exp-members-more">+2</span>
+        </button>
+      </div>
+    </div>
+    <!-- Success token -->
+    <div class="card">
+      <div style="font-size:0.75rem;color:var(--fg-soft);margin-bottom:0.5rem">--success token (settings-profile-ok)</div>
+      <div class="settings-profile-ok">✓ Alias guardado correctamente</div>
+      <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--danger)">✗ Error al guardar</div>
+    </div>
+    <!-- Orb colors comment reference -->
+    <div class="card">
+      <div style="font-size:0.75rem;color:var(--fg-soft);margin-bottom:0.5rem">Orb flotante (saturados a propósito, sin tokenizar)</div>
+      <div style="display:flex;gap:0.75rem;align-items:center">
+        <div style="width:2.75rem;height:2.75rem;border-radius:50%;background:#ef2d18;flex-shrink:0"></div>
+        <div style="width:2.75rem;height:2.75rem;border-radius:50%;background:#ff9a4d;flex-shrink:0"></div>
+        <div style="width:2.75rem;height:2.75rem;border-radius:50%;background:#8a8b94;flex-shrink:0"></div>
+      </div>
+      <div style="font-size:0.78rem;color:var(--fg-soft);margin-top:0.4rem">idle · hablando · pensando</div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile preview note -->
+<div class="section" style="border-top:1px solid var(--line);padding-top:1.5rem">
+  <h2>Verificación mobile (~390px): redimensionar ventana</h2>
+  <p style="font-size:0.85rem;color:var(--fg-soft)">
+    Los tokens de radio, el tinte oliva y el peso del título se aplican globalmente.
+    Reducí la ventana a ~390px para verificar que no haya layout roto.
+    Las tabs preservan el redondeo solo-arriba (border-radius: var(--r-md) var(--r-md) 0 0).
+  </p>
+</div>
+
+</body>
+</html>

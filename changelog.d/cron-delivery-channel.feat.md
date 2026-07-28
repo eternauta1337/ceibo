@@ -1,0 +1,1 @@
+Los recordatorios (crons) ahora se entregan en el canal donde los creaste (web, Telegram o WhatsApp), no siempre por Telegram. Para la web, la entrega es durable: aparece en un inbox persistente con una campanita (🔔) y un contador de no-leídos; al hacer click se abre la notificación como una burbuja en el chat.

@@ -1,0 +1,1 @@
+Sub-timing diagnóstico del revival de sesión local (archima): los logs ahora desglosan el cold-open en `⏱ revival[vm] state:.. wiki:.. session:..`, `⏱ session serve:.. post:..` y `⏱ mcp reconcile:.. wanted/reused/reconnected` — para pinpoint qué paso del reopen come los ~40s (open) y los ~25s (MCP reconcile), y si el MCP se re-monta de más vs es el pacing. Solo-logging.

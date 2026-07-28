@@ -1,0 +1,32 @@
+{
+  "name": "@ceibo/web-server",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Servicio web standalone de ceibo: SPA + SSE + magic-link + plano repos (wikis in-process). Se conecta al gateway por el canal remoto para la mensajería; el plano repos NO depende del agente (D3). Proceso propio detrás del ingress.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "cutover:verify": "tsx src/cutover-verify.ts"
+  },
+  "dependencies": {
+    "@ceibo/agent": "workspace:*",
+    "@ceibo/channels": "workspace:*",
+    "@ceibo/mcps": "workspace:*",
+    "@ceibo/oauth": "workspace:*",
+    "@ceibo/speech": "workspace:*",
+    "@ceibo/store": "workspace:*",
+    "@ceibo/wikis": "workspace:*",
+    "better-sqlite3": "^12.10.0",
+    "resend": "^6.12.2"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.6"
+  }
+}

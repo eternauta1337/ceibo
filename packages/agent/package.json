@@ -1,0 +1,17 @@
+{
+  "name": "@ceibo/agent",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Cliente de Managed Agents cloud: la sesión como stream bidireccional sin turnos. Channel-agnostic.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.97.1"
+  }
+}

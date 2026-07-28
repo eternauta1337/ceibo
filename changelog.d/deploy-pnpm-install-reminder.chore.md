@@ -1,0 +1,1 @@
+Recordatorio en CLAUDE.md: un cambio en `patches/` o `pnpm-lock.yaml` exige `pnpm install` manual en la box al deployar (prod y staging) — el rsync solo copia `packages/`, y un pnpm patch no toca `package.json`, así que es fácil saltearlo y dejar el fix sin efecto.

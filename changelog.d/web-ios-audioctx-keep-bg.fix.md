@@ -1,0 +1,1 @@
+En iOS ya no se cierra el AudioContext al pasar a background (regresión de #645): al volver, la animación del mic se mueve y la respuesta de voz suena de una, sin tener que dar play manual. El mic se sigue soltando en background para no dejar "llamadas" colgadas por Bluetooth.

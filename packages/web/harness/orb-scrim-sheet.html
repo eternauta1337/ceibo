@@ -1,0 +1,63 @@
+<!doctype html>
+<!-- Contact sheet del orb-scrim-lab: las 6 variantes lado a lado para UN fondo, cada una
+     en un iframe a viewport real (desktop 1440x900 o mobile 390x844) escalado. Un solo
+     screenshot del sheet = comparación completa e internamente consistente.
+
+     Uso: http://localhost:5199/harness/orb-scrim-sheet.html?bg=light&dev=desktop|mobile -->
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>orb scrim sheet — ceibo</title>
+    <style>
+      body { margin: 0; background: #111; font-family: system-ui, sans-serif; padding: 10px; }
+      h1 { color: #eee; font-size: 15px; margin: 2px 0 8px; }
+      .grid { display: grid; gap: 10px; }
+      body[data-dev="desktop"] .grid { grid-template-columns: repeat(2, 1fr); }
+      body[data-dev="mobile"] .grid { grid-template-columns: repeat(3, 1fr); }
+      figure { margin: 0; }
+      figcaption { color: #ddd; font-size: 12px; padding: 4px 2px; }
+      .frame { overflow: hidden; border-radius: 6px; }
+      iframe { border: 0; transform-origin: top left; pointer-events: none; }
+      /* desktop: iframe 1440x900 escalado a 720px de ancho (2 col) */
+      body[data-dev="desktop"] iframe { width: 1440px; height: 900px; transform: scale(0.5); }
+      body[data-dev="desktop"] .frame { width: 720px; height: 450px; }
+      /* mobile: iframe 390x844 a tamaño REAL (3 col) */
+      body[data-dev="mobile"] iframe { width: 390px; height: 844px; }
+      body[data-dev="mobile"] .frame { width: 390px; height: 844px; }
+    </style>
+  </head>
+  <body>
+    <h1 id="title"></h1>
+    <div class="grid" id="grid"></div>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const bg = params.get("bg") ?? "light";
+      const dev = params.get("dev") === "mobile" ? "mobile" : "desktop";
+      document.body.dataset.dev = dev;
+      document.getElementById("title").textContent = `orb scrim — fondo: ${bg} · ${dev}`;
+      const NAMES = {
+        none: "sin scrim (actual)",
+        a: "a · halo radial",
+        b: "b · scrim amplio",
+        c: "c · sombra blur",
+        d: "d · viñeta foto",
+        e: "e · combo (viñeta suave + halo tenue)",
+        f: "f · canon review P0-2 (dock::before + sombra saludo)",
+      };
+      const grid = document.getElementById("grid");
+      for (const v of ["none", "a", "b", "c", "d", "e", "f"]) {
+        const fig = document.createElement("figure");
+        const div = document.createElement("div");
+        div.className = "frame";
+        const f = document.createElement("iframe");
+        f.src = `/harness/orb-scrim-lab.html?bg=${bg}&v=${v}&clean=1`;
+        div.appendChild(f);
+        const cap = document.createElement("figcaption");
+        cap.textContent = NAMES[v];
+        fig.appendChild(div);
+        fig.appendChild(cap);
+        grid.appendChild(fig);
+      }
+    </script>
+  </body>
+</html>

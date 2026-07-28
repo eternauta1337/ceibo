@@ -1,0 +1,37 @@
+{
+  "name": "@ceibo/gateway",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Proceso always-on: recibe de los canales (Chat SDK), rutea a usuario/sesión y contabiliza.",
+  "exports": {
+    "./logic": "./src/logic.ts"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "eval:intelligence": "tsx src/intelligence-eval-runner.ts",
+    "eval:notes-recall": "tsx src/notes-recall-eval.ts",
+    "publish-agent": "tsx publish-agent.ts",
+    "print-prompt": "tsx print-prompt.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.97.1",
+    "@ceibo/agent": "workspace:*",
+    "@ceibo/backend-local": "workspace:*",
+    "@ceibo/channels": "workspace:*",
+    "@ceibo/mcps": "workspace:*",
+    "@ceibo/oauth": "workspace:*",
+    "@ceibo/speech": "workspace:*",
+    "@ceibo/store": "workspace:*",
+    "@ceibo/wikis": "workspace:*",
+    "@chat-adapter/telegram": "latest",
+    "chat": "^4.24.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.6"
+  }
+}

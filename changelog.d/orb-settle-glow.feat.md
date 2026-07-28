@@ -1,0 +1,1 @@
+El orbe vuelve a aquietarse: tras unos segundos sin actividad se asienta en un círculo perfecto y quieto (y revive al instante cuando el asistente hace algo). Y se bajó el glow un 50% (se notaba fuerte al hablar, sobre todo en mobile).

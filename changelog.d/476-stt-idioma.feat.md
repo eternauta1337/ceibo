@@ -1,0 +1,1 @@
+El dictado por voz ahora respeta tu idioma configurado: sesga la transcripción hacia tu idioma (es/en) en vez de autodetectar a ciegas, así un audio corto en español deja de detectarse como inglés u otro idioma.

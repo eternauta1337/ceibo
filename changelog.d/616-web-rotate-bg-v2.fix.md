@@ -1,0 +1,1 @@
+Fondo al rotar la pantalla: ahora el fondo se pinta en una capa fija dimensionada por el viewport real, así cubre siempre hasta el borde derecho y no deja banda gris (el fix anterior no alcanzaba en iOS).

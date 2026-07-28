@@ -1,0 +1,35 @@
+{
+  "name": "@ceibo/web",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "UI web de ceibo (managed-ui): círculo push-to-talk + espacio de wiki. React + Vite, build estático servido por el gateway.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@atomic-editor/editor": "^0.4.3",
+    "@ceibo/orb": "workspace:*",
+    "@codemirror/language": "^6.12.3",
+    "@codemirror/state": "^6.6.0",
+    "@codemirror/view": "^6.43.0",
+    "@fontsource-variable/inter-tight": "^5.2.7",
+    "emojilib": "^4.0.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "unicode-emoji-json": "^0.9.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "fake-indexeddb": "^6.2.5",
+    "vite": "^6.0.0"
+  }
+}

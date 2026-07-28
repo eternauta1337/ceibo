@@ -1,0 +1,1 @@
+El emoji de una nota ahora se elige desde un botón sutil (una hendidura casi imperceptible) a la izquierda del título de la página, no desde el explorador. El emoji se sigue viendo en el árbol, la pestaña y el título.

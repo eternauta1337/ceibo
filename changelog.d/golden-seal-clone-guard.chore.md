@@ -1,0 +1,1 @@
+`build-golden.sh`/`warm-golden.sh` abortan si hay clones linked-clone vivos colgando de la golden antes de re-sellarla (re-sellar con clones vivos corrompía el disco de esas VMs = pérdida del estado de sesión). Override consciente cuando ya los destruiste: `I_KILLED_THE_CLONES=1`.

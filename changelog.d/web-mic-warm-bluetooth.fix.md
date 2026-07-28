@@ -1,0 +1,1 @@
+El micrófono se mantiene "caliente" entre turnos en vez de re-rutear la sesión de audio en cada uno, para que el Bluetooth del auto deje de ciclar la "llamada". La categoría de audio sólo vuelve a parlante al soltar el mic de verdad (inactividad / segundo plano).

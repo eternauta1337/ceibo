@@ -1,0 +1,1 @@
+El agente archima lee/escribe wikis por una URL local (tailscale) separada de la pública que usa el backend MA, y el firewall de la VM permite ese endpoint de forma persistente — escritura de notas robusta e inmune a la rotación del IP público.

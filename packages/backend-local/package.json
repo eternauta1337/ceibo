@@ -1,0 +1,23 @@
+{
+  "name": "@ceibo/backend-local",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "Backend de sesión local (archima): implementa SessionBackend de @ceibo/agent sobre Agent Vault + cp.sh + opencode. El gateway lo elige para usuarios con backend_mode='local'.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ceibo/agent": "workspace:*",
+    "jimp": "^1.6.0",
+    "unpdf": "^1.6.2"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.6"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "description": "Pins de los assets BOX-LEVEL que el runtime de archima necesita pero NO viven en git (binarios/blobs pesados o dependencias externas compartidas). Se versiona el pin/receta, no el blob. Ver README.",
+  "agentVault": {
+    "upstream": "https://github.com/Infisical/agent-vault",
+    "pin": "v0.23.0",
+    "installedBinary": { "version": "0.23.0", "commit": "7d60bba", "built": "2026-06-01T04:29:08Z" },
+    "note": "Black-box, sin commits locales (verificado). Se pinea a una RELEASE real (v0.23.0), no al commit de checkout transitorio que tenía la box (cee96bd, un bump de deps). El binario se instala en la box (~29M), no se versiona. Si hay que modificarlo: patch>fork.",
+    "install": "Buildear/descargar la release v0.23.0 del upstream e instalar en el path compartido box-level (F6.2: ~/archima/agent-vault/agent-vault)."
+  },
+  "golden": {
+    "recipe": "runtime/vm/build-golden.sh",
+    "warm": "runtime/vm/warm-golden.sh",
+    "base": "noble-base.img (Ubuntu 24.04 cloud image)",
+    "note": "El blob (golden + noble-base, ~600M) vive en /var/lib/libvirt/images, NO en git. Se versiona la RECETA (build-golden.sh). Compartida entre entornos: un cambio a nivel golden es op box-wide coordinada (ver Riesgos del plan)."
+  },
+  "vllm": {
+    "note": "Modelo Gemma 4 31B FP8 servido por vllm.service en gpuhost (100.64.0.10:8000). Dependencia externa COMPARTIDA por los 3 entornos (como la API de Anthropic) — no se versiona por entorno (spec §5).",
+    "keyFile": "~/.archima/vllm.key",
+    "placeholder": "__VLLM_KEY__"
+  },
+  "anthropic": {
+    "note": "El config trae el handle vault-… (ref de agent-vault), NO la sk-ant real. El MITM de agent-vault (~/archima/agent-vault, :14322) lo resuelve a la key real sin que la VM la vea. El ref es un capability handle → se trata como secreto y se restaura al servir desde un file box-level (mismo patrón que vLLM). El cutover de la box (F6.2) puebla refFile desde el config viejo.",
+    "refFile": "~/.archima/anthropic.ref",
+    "placeholder": "__ANTHROPIC_VAULT_REF__"
+  }
+}

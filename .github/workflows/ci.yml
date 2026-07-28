@@ -1,0 +1,52 @@
+name: ci
+
+# Un solo job para todo: lint + typecheck + la suite completa con coverage.
+# (El repo original tenía gates escalonados por branch destino, con un flow-guard
+# feature→dev→staging→main atado a su flujo de deploy. Acá no aplica.)
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # Los pisos de cobertura son por archivo (vitest.config.ts) y rechazan si bajan.
+      - name: Test (con coverage)
+        run: pnpm test:cov
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          f=coverage/coverage-summary.json
+          [ -f "$f" ] || { echo "(sin coverage-summary.json)"; exit 0; }
+          {
+            echo "### Cobertura (líneas)"
+            echo ""
+            echo "| Total | $(node -p "require('./$f').total.lines.pct")% |"
+            echo "|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
