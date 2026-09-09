@@ -12,8 +12,9 @@ channels, persistent memory, voice, scheduled tasks, and spend accounting.
 > several months with real users. The code is exactly as it came out of that operation, with
 > infrastructure identifiers replaced by examples.
 >
-> **This README is the only file in English.** Comments, docs, and commit messages are in
-> **Spanish**, which is how it was written.
+> **This README and [docs/PROCESS.md](docs/PROCESS.md) are the only files in English.**
+> Comments, docs, planning notes, and commit messages are in **Spanish**, which is how it
+> was written.
 
 ---
 
@@ -129,6 +130,19 @@ pnpm test          # ~2,200 tests
 
 The husky pre-push hook runs all three. Dev setup details, including the local backend, are in
 **[dev.md](dev.md)** (Spanish).
+
+---
+
+## How it was planned
+
+Every non-trivial feature has a `spec.md` (the design argument and the rejected
+alternatives), a `plan.md` (checkboxes and PR numbers, updated as the work landed), and the
+record of what was actually run to verify it. Those documents lived in a private wiki next
+to the repo; they are reproduced under **[docs/planning/](docs/planning/)**, with
+**[docs/PROCESS.md](docs/PROCESS.md)** as the map.
+
+The shortest path in is [the decay feature](docs/planning/features/decay/) — memory that
+forgets, where the plan opens with the analysis that invalidated the original design.
 
 ---
 
