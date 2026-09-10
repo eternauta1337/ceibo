@@ -59,8 +59,8 @@ export function isGroupJid(jid: string): boolean {
 /**
  * Saca el sufijo de device-id de un JID. WhatsApp agrega `:<device>` al JID de un
  * participante para desambiguar qué device linkeado mandó el mensaje (ej.
- * `221796573954137:24@lid`). Para routing/identidad queremos la forma independiente del
- * device (`221796573954137@lid`).
+ * `111111111111111:24@lid`). Para routing/identidad queremos la forma independiente del
+ * device (`111111111111111@lid`).
  */
 export function stripDeviceSuffix(jid: string): string {
   const atIndex = jid.lastIndexOf("@");

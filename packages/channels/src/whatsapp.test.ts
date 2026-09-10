@@ -25,7 +25,7 @@ describe("jid helpers", () => {
     expect(isGroupJid("5491100@s.whatsapp.net")).toBe(false);
   });
   it("stripDeviceSuffix saca el :device", () => {
-    expect(stripDeviceSuffix("221796573954137:24@lid")).toBe("221796573954137@lid");
+    expect(stripDeviceSuffix("111111111111111:24@lid")).toBe("111111111111111@lid");
     expect(stripDeviceSuffix("5491100@s.whatsapp.net")).toBe("5491100@s.whatsapp.net");
   });
 });
